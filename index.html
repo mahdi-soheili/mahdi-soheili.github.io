@@ -32,10 +32,10 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'Vazirmatn', sans-serif;
   }
 
   body {
-    font-family: 'Vazirmatn', sans-serif;
     background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
     color: var(--text-light);
     min-height: 100vh;
@@ -151,6 +151,7 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
+    font-family: 'Vazirmatn', sans-serif;
   }
 
   .btn-primary {
@@ -264,7 +265,6 @@
     border: 1px solid var(--dark-border);
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-light);
-    font-family: 'Vazirmatn', sans-serif;
     font-size: 15px;
     transition: var(--transition);
   }
@@ -314,7 +314,6 @@
     border: 1px solid var(--dark-border);
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-light);
-    font-family: 'Vazirmatn', sans-serif;
     font-size: 15px;
     transition: var(--transition);
   }
@@ -466,7 +465,6 @@
     border: 1px solid var(--dark-border);
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-light);
-    font-family: 'Vazirmatn', sans-serif;
     font-size: 14px;
   }
 
@@ -496,7 +494,6 @@
     border: 1px solid var(--dark-border);
     background: rgba(255, 255, 255, 0.05);
     color: var(--text-light);
-    font-family: 'Vazirmatn', sans-serif;
     font-size: 14px;
   }
 
@@ -772,6 +769,7 @@
     gap: 8px;
     margin-bottom: 10px;
     cursor: pointer;
+    font-weight: 500;
   }
 
   .optional-content {
@@ -1805,6 +1803,9 @@
         link.click();
         
         showNotification('خروجی PNG با موفقیت ایجاد شد', 2000);
+      }).catch(error => {
+        console.error('Error exporting PNG:', error);
+        showNotification('خطا در ایجاد خروجی PNG', 2000);
       });
     });
     
