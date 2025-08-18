@@ -1,214 +1,752 @@
-# Create the MashqYar single-file web app (RTL, Persian labels, localStorage, notifications, JSON/ICS export)
-html_content = r"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>مشق‌یار – یادآور تکالیف دانش‌آموزی</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css" rel="stylesheet" />
 <style>
-  :root{
-    --bg:#0b1324;
-    --card:#101a33;
-    --muted:#a8b3cf;
-    --text:#e7ecf8;
-    --accent:#4e9eff;
-    --accent-2:#6ae6b9;
-    --danger:#ff6b6b;
-    --warn:#ffb84d;
-    --ok:#76e39f;
-    --shadow: 0 10px 25px rgba(0,0,0,.35);
+  :root {
+    --primary: #4361ee;
+    --primary-light: #4cc9f0;
+    --secondary: #3a0ca3;
+    --accent: #f72585;
+    --success: #4cc9f0;
+    --warning: #f8961e;
+    --danger: #ef476f;
+    --dark: #03071e;
+    --dark-card: #1d3557;
+    --dark-border: rgba(255, 255, 255, 0.1);
+    --light: #f8f9fa;
+    --light-card: #ffffff;
+    --light-border: rgba(0, 0, 0, 0.1);
+    --text-dark: #212529;
+    --text-light: #f8f9fa;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     --radius: 16px;
+    --transition: all 0.3s ease;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family: Vazirmatn, Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-    background: radial-gradient(1200px 800px at 100% -10%, #18264e, var(--bg));
-    color:var(--text);
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
-  header{
-    padding:20px 16px;
-    position:sticky; top:0; z-index:100;
-    background: linear-gradient(180deg, rgba(11,19,36,.95), rgba(11,19,36,.65) 60%, transparent);
-    backdrop-filter: blur(6px);
-    border-bottom:1px solid rgba(255,255,255,.06);
+
+  body {
+    font-family: 'Vazirmatn', sans-serif;
+    background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
+    color: var(--text-light);
+    min-height: 100vh;
+    transition: var(--transition);
   }
-  .wrap{max-width:1050px; margin:0 auto; padding:0 12px;}
-  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
-  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.4px}
-  .logo{
-    width:38px;height:38px; border-radius:12px;
-    background: conic-gradient(from 220deg, var(--accent), var(--accent-2));
-    box-shadow: 0 8px 24px rgba(78,158,255,.35), inset 0 0 12px rgba(255,255,255,.2);
+
+  body.light-theme {
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    color: var(--text-dark);
   }
-  .brand h1{font-size:20px; margin:0}
-  .pill{
-    font-size:12px; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.07); color:var(--muted); border:1px solid rgba(255,255,255,.1)
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
   }
-  .grid{
-    display:grid; gap:14px; grid-template-columns: 1fr 2fr;
+
+  header {
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(3, 7, 30, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--dark-border);
+    transition: var(--transition);
   }
-  @media (max-width:900px){ .grid{ grid-template-columns: 1fr } }
-  .card{
-    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.00));
-    border:1px solid rgba(255,255,255,.08);
+
+  body.light-theme header {
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid var(--light-border);
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 20px;
+    color: white;
+    box-shadow: 0 4px 10px rgba(67, 97, 238, 0.4);
+  }
+
+  .logo h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .tagline {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-top: 4px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .theme-toggle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+
+  body.light-theme .theme-toggle {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-dark);
+  }
+
+  .theme-toggle:hover {
+    transform: scale(1.05);
+  }
+
+  .btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+  }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+  }
+
+  body.light-theme .btn-secondary {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-dark);
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, var(--danger), #ff6b6b);
+    color: white;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  main {
+    padding: 30px 0;
+  }
+
+  .dashboard {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 24px;
+    margin-bottom: 30px;
+  }
+
+  @media (max-width: 900px) {
+    .dashboard {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .card {
+    background: var(--dark-card);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
   }
-  .card h2{margin:0; font-size:16px; color:#dbe6ff}
-  .card .head{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.07)}
-  .card .body{padding:14px 16px}
-  .muted{color:var(--muted); font-size:13px}
-  label{font-size:13px; color:#cdd7f1}
-  input, select, textarea, button{
-    width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
-    background:#0f1831; color:var(--text); outline:none;
+
+  body.light-theme .card {
+    background: var(--light-card);
   }
-  input::placeholder, textarea::placeholder{color:#8da0ca}
-  .row-2{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
-  .row-3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px}
-  .actions{display:flex; gap:8px; flex-wrap:wrap}
-  .btn{cursor:pointer; transition:.2s transform, .2s opacity; font-weight:600}
-  .btn:hover{transform:translateY(-1px)}
-  .btn:active{transform:translateY(0)}
-  .btn-accent{background: linear-gradient(90deg, var(--accent), #7fb4ff); border:none; color:#08213d}
-  .btn-ghost{background: rgba(255,255,255,.06)}
-  .btn-danger{background: linear-gradient(90deg, #ff7a7a, #ff5e5e); border:none; color:#3d0a0a}
-  .btn-ok{background: linear-gradient(90deg, #7ff0b9, #55d699); border:none; color:#0d3126}
-  .list{display:flex; flex-direction:column; gap:10px}
-  .task{
-    display:grid; gap:10px; grid-template-columns: 1fr auto; align-items:center;
-    padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,.09);
-    background: rgba(255,255,255,.03);
+
+  .card-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--dark-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
-  .task.overdue{border-color: rgba(255,0,0,.35); box-shadow: inset 0 0 0 1px rgba(255,0,0,.15)}
-  .task .meta{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
-  .badge{font-size:11px; padding:5px 9px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09); color:#dbe6ff}
-  .badge.dot{display:inline-flex; align-items:center; gap:8px}
-  .dot{width:10px; height:10px; border-radius:999px; display:inline-block}
-  .title{font-weight:700; margin-bottom:6px}
-  .task .left{min-width:0}
-  .task .right{display:flex; gap:6px}
-  .section-title{margin:18px 0 10px; font-size:14px; color:#cfe0ff}
-  .hr{height:1px; background: rgba(255,255,255,.06); margin:8px 0 14px}
-  .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
-  .search{flex:1}
-  .empty{padding:18px; color:var(--muted); text-align:center}
-  .footer{padding:18px; font-size:12px; color:var(--muted); text-align:center}
-  .link{color:#cfe0ff; text-decoration: none; border-bottom:1px dotted #8ea8ff}
-  .kpi{display:flex; gap:10px; flex-wrap:wrap}
-  .kpi .box{flex:1; min-width:120px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); padding:10px 12px; border-radius:12px}
-  .box b{display:block; font-size:18px; margin-top:4px}
-  .divider{height:12px}
-  .small{font-size:12px}
-  .toggle{display:flex; align-items:center; gap:8px}
-  .toggle input{width:18px; height:18px}
+
+  body.light-theme .card-header {
+    border-bottom: 1px solid var(--light-border);
+  }
+
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  body.light-theme .card-icon {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .card-body {
+    padding: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--dark-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-light);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 15px;
+    transition: var(--transition);
+  }
+
+  body.light-theme .form-control {
+    background: rgba(0, 0, 0, 0.02);
+    color: var(--text-dark);
+    border: 1px solid var(--light-border);
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  .form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+  }
+
+  @media (max-width: 768px) {
+    .form-row, .form-row-3 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .subjects-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 15px 0;
+  }
+
+  .subject-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 14px;
+  }
+
+  body.light-theme .subject-badge {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .subject-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--dark-border);
+    margin: 20px 0;
+  }
+
+  body.light-theme .divider {
+    background: var(--light-border);
+  }
+
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+  }
+
+  body.light-theme .stat-card {
+    background: rgba(0, 0, 0, 0.03);
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 5px 0;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    opacity: 0.8;
+  }
+
+  .tasks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 10px 16px 10px 45px;
+    border-radius: 10px;
+    border: 1px solid var(--dark-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-light);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 14px;
+  }
+
+  body.light-theme .search-box input {
+    background: rgba(0, 0, 0, 0.02);
+    color: var(--text-dark);
+    border: 1px solid var(--light-border);
+  }
+
+  .search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.6;
+  }
+
+  .filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .filter-select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--dark-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-light);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 14px;
+  }
+
+  body.light-theme .filter-select {
+    background: rgba(0, 0, 0, 0.02);
+    color: var(--text-dark);
+    border: 1px solid var(--light-border);
+  }
+
+  .tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .task-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 15px;
+    align-items: center;
+    transition: var(--transition);
+  }
+
+  body.light-theme .task-item {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  .task-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .task-item.overdue {
+    border-right: 3px solid var(--danger);
+  }
+
+  .task-content h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .task-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  body.light-theme .task-badge {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .priority-high {
+    background: rgba(239, 71, 111, 0.2);
+    color: #ff8fab;
+  }
+
+  .priority-low {
+    background: rgba(76, 201, 240, 0.2);
+    color: #a5d8ff;
+  }
+
+  .task-description {
+    font-size: 14px;
+    opacity: 0.8;
+    line-height: 1.5;
+  }
+
+  .task-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .task-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+
+  body.light-theme .task-btn {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-dark);
+  }
+
+  .task-btn:hover {
+    background: var(--primary);
+  }
+
+  .task-btn.complete {
+    background: rgba(76, 201, 240, 0.2);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    opacity: 0.7;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+    opacity: 0.7;
+    margin-top: 30px;
+  }
+
+  .notification {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: var(--dark-card);
+    color: var(--text-light);
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: var(--transition);
+    max-width: 300px;
+  }
+
+  body.light-theme .notification {
+    background: var(--light-card);
+    color: var(--text-dark);
+  }
+
+  .notification.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .notification-icon {
+    font-size: 20px;
+  }
+
+  .notification-close {
+    margin-right: auto;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-size: 16px;
+  }
 </style>
 </head>
 <body>
   <header>
-    <div class="wrap row">
-      <div class="brand">
-        <div class="logo"></div>
-        <h1>مشق‌یار</h1>
-        <span class="pill">یادآور تکالیف دانش‌آموزی</span>
-      </div>
-      <div class="actions" style="margin-inline-start:auto">
-        <button id="exportJsonBtn" class="btn btn-ghost">خروجی JSON</button>
-        <button id="importJsonBtn" class="btn btn-ghost">ورودی JSON</button>
-        <input id="importFile" type="file" accept=".json" style="display:none">
-        <button id="exportIcsBtn" class="btn btn-ghost">خروجی تقویم ICS</button>
-        <button id="clearBtn" class="btn btn-danger">حذف همه داده‌ها</button>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">م</div>
+          <div>
+            <h1>مشق‌یار</h1>
+            <div class="tagline">یادآور تکالیف دانش‌آموزی</div>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button id="exportJsonBtn" class="btn btn-secondary">خروجی JSON</button>
+          <button id="importJsonBtn" class="btn btn-secondary">ورودی JSON</button>
+          <input id="importFile" type="file" accept=".json" style="display:none">
+          <button id="exportIcsBtn" class="btn btn-secondary">خروجی تقویم</button>
+          <button id="clearBtn" class="btn btn-danger">حذف داده‌ها</button>
+          <button id="themeToggle" class="theme-toggle">🌙</button>
+        </div>
       </div>
     </div>
   </header>
 
-  <main class="wrap" style="padding:16px 12px 32px">
-    <div class="grid">
-      <!-- Left: Forms -->
-      <section class="card">
-        <div class="head">
-          <h2>افزودن درس و تکلیف</h2>
-        </div>
-        <div class="body">
-          <div class="section-title">۱) تعریف درس</div>
-          <div class="row-3">
-            <div><label>نام درس</label><input id="subjectName" placeholder="مثلاً ریاضی"></div>
-            <div><label>رنگ</label><input id="subjectColor" type="color" value="#4e9eff"></div>
-            <div style="display:flex; align-items:flex-end"><button id="addSubjectBtn" class="btn btn-ok">افزودن درس</button></div>
+  <main class="container">
+    <div class="dashboard">
+      <!-- Left Column: Forms -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-icon">📚</div>
+            <span>افزودن درس و تکلیف</span>
           </div>
-          <div class="hr"></div>
-          <div id="subjectsBadges" class="toolbar"></div>
-
-          <div class="divider"></div>
-          <div class="section-title">۲) افزودن تکلیف</div>
-          <div class="row-2">
-            <div><label>عنوان تکلیف</label><input id="taskTitle" placeholder="حل تمرین فصل ۲"></div>
-            <div><label>درس</label>
-              <select id="taskSubject"></select>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">نام درس</label>
+            <div class="form-row">
+              <input type="text" id="subjectName" class="form-control" placeholder="مثلاً ریاضی">
+              <input type="color" id="subjectColor" class="form-control" value="#4361ee">
+              <button id="addSubjectBtn" class="btn btn-primary">افزودن</button>
             </div>
           </div>
-          <div class="row-3">
-            <div><label>تاریخ و ساعت تحویل</label><input id="taskDue" type="datetime-local"></div>
-            <div><label>یادآوری (دقیقه قبل از موعد)</label><input id="taskRemind" type="number" placeholder="مثلاً 120"></div>
-            <div>
-              <label>اولویت</label>
-              <select id="taskPriority">
+
+          <div class="subjects-container" id="subjectsBadges"></div>
+
+          <div class="divider"></div>
+
+          <div class="form-group">
+            <label class="form-label">عنوان تکلیف</label>
+            <input type="text" id="taskTitle" class="form-control" placeholder="حل تمرین فصل ۲">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">درس</label>
+            <select id="taskSubject" class="form-control"></select>
+          </div>
+
+          <div class="form-row-3">
+            <div class="form-group">
+              <label class="form-label">تاریخ تحویل</label>
+              <input type="text" id="taskDue" class="form-control" placeholder="انتخاب تاریخ">
+            </div>
+            <div class="form-group">
+              <label class="form-label">ساعت تحویل</label>
+              <input type="time" id="taskTime" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">اولویت</label>
+              <select id="taskPriority" class="form-control">
                 <option value="normal">معمولی</option>
                 <option value="high">بالا</option>
                 <option value="low">کم</option>
               </select>
             </div>
           </div>
-          <div>
-            <label>اعضای گروه (اختیاری)</label>
-            <input id="taskMembers" placeholder="مثلاً: علی، سارا">
-          </div>
-          <div>
-            <label>توضیحات</label>
-            <textarea id="taskNotes" rows="3" placeholder="توضیحات تکلیف..."></textarea>
-          </div>
-          <div class="actions" style="margin-top:10px">
-            <button id="addTaskBtn" class="btn btn-accent">ثبت تکلیف</button>
-            <button id="requestNotifyBtn" class="btn btn-ghost">فعال‌سازی اعلان‌ها</button>
+
+          <div class="form-group">
+            <label class="form-label">یادآوری (دقیقه قبل از موعد)</label>
+            <input type="number" id="taskRemind" class="form-control" placeholder="مثلاً 120">
           </div>
 
-          <div class="divider"></div>
-          <div class="kpi">
-            <div class="box small">تکالیف باز<b id="kpiOpen">0</b></div>
-            <div class="box small">تکمیل‌شده<b id="kpiDone">0</b></div>
-            <div class="box small">نزدیک‌ترین موعد<b id="kpiNext">—</b></div>
+          <div class="form-group">
+            <label class="form-label">اعضای گروه (اختیاری)</label>
+            <input type="text" id="taskMembers" class="form-control" placeholder="مثلاً: علی، سارا">
           </div>
-        </div>
-      </section>
 
-      <!-- Right: List -->
-      <section class="card">
-        <div class="head">
-          <h2>تکالیف من</h2>
-          <div class="toolbar" style="margin-inline-start:auto">
-            <input id="searchBox" class="search" placeholder="جستجو در عنوان/توضیحات/اعضا...">
-            <select id="filterSubject"><option value="">همه درس‌ها</option></select>
-            <select id="filterStatus">
-              <option value="">وضعیت</option>
-              <option value="open">باز</option>
-              <option value="done">انجام‌شده</option>
-              <option value="overdue">عقب‌افتاده</option>
-            </select>
-            <select id="sortBy">
-              <option value="dueAsc">نزدیک‌ترین موعد</option>
-              <option value="dueDesc">دورترین موعد</option>
-              <option value="prio">اولویت</option>
-              <option value="created">تاریخ ایجاد</option>
-            </select>
+          <div class="form-group">
+            <label class="form-label">توضیحات</label>
+            <textarea id="taskNotes" class="form-control" rows="3" placeholder="توضیحات تکلیف..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <button id="addTaskBtn" class="btn btn-primary" style="width: 100%;">ثبت تکلیف</button>
+          </div>
+
+          <div class="stats-container">
+            <div class="stat-card">
+              <div class="stat-label">تکالیف باز</div>
+              <div class="stat-value" id="kpiOpen">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">تکمیل‌شده</div>
+              <div class="stat-value" id="kpiDone">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">نزدیک‌ترین موعد</div>
+              <div class="stat-value" id="kpiNext">—</div>
+            </div>
           </div>
         </div>
-        <div class="body">
-          <div id="tasksList" class="list"></div>
-          <div id="emptyState" class="empty" style="display:none">هنوز تکلیفی ثبت نشده. از فرم سمت راست اضافه کن ✍️</div>
+      </div>
+
+      <!-- Right Column: Tasks List -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-icon">📝</div>
+            <span>تکالیف من</span>
+          </div>
         </div>
-      </section>
+        <div class="card-body">
+          <div class="tasks-header">
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchBox" class="form-control" placeholder="جستجو در تکالیف...">
+            </div>
+            <div class="filters">
+              <select id="filterSubject" class="filter-select">
+                <option value="">همه درس‌ها</option>
+              </select>
+              <select id="filterStatus" class="filter-select">
+                <option value="">همه وضعیت‌ها</option>
+                <option value="open">باز</option>
+                <option value="done">انجام‌شده</option>
+                <option value="overdue">عقب‌افتاده</option>
+              </select>
+              <select id="sortBy" class="filter-select">
+                <option value="dueAsc">نزدیک‌ترین موعد</option>
+                <option value="dueDesc">دورترین موعد</option>
+                <option value="prio">اولویت</option>
+                <option value="created">تاریخ ایجاد</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="tasks-list" id="tasksList"></div>
+          <div class="empty-state" id="emptyState" style="display:none">
+            <div class="empty-icon">📭</div>
+            <h3>هنوز تکلیفی ثبت نشده</h3>
+            <p>از فرم سمت چپ اضافه کن ✍️</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="footer">
@@ -216,421 +754,639 @@ html_content = r"""<!DOCTYPE html>
     </div>
   </main>
 
-<script>
-// --- Utilities
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
-const storeKey = 'mashqyar:v1';
-const notifiedKey = 'mashqyar:notified';
+  <div class="notification" id="notification">
+    <span class="notification-icon">✓</span>
+    <span class="notification-message">پیام با موفقیت ثبت شد</span>
+    <button class="notification-close">×</button>
+  </div>
 
-function uid(){ return 'id_' + Math.random().toString(36).slice(2,10) }
-
-function loadData(){
-  try{
-    const raw = localStorage.getItem(storeKey);
-    if(!raw) return {subjects:[], tasks:[]};
-    const data = JSON.parse(raw);
-    if(!data.subjects) data.subjects = [];
-    if(!data.tasks) data.tasks = [];
-    return data;
-  }catch(e){
-    console.error(e);
-    return {subjects:[], tasks:[]};
-  }
-}
-function saveData(data){
-  localStorage.setItem(storeKey, JSON.stringify(data));
-}
-
-let state = loadData();
-
-// --- Subjects
-function renderSubjects(){
-  const subjectSelect = $('#taskSubject');
-  const filterSubject = $('#filterSubject');
-  subjectSelect.innerHTML = '';
-  filterSubject.innerHTML = '<option value="">همه درس‌ها</option>';
-
-  state.subjects.forEach(s => {
-    const opt = document.createElement('option');
-    opt.value = s.id; opt.textContent = s.name;
-    subjectSelect.appendChild(opt);
-
-    const opt2 = document.createElement('option');
-    opt2.value = s.id; opt2.textContent = s.name;
-    filterSubject.appendChild(opt2);
-  });
-
-  const badges = $('#subjectsBadges');
-  badges.innerHTML = '';
-  state.subjects.forEach(s => {
-    const span = document.createElement('span');
-    span.className='badge dot';
-    span.innerHTML = '<span class="dot" style="background:'+s.color+'"></span>'+s.name;
-    badges.appendChild(span);
-  });
-}
-renderSubjects();
-
-$('#addSubjectBtn').addEventListener('click', () => {
-  const name = $('#subjectName').value.trim();
-  const color = $('#subjectColor').value || '#4e9eff';
-  if(!name){ alert('نام درس را بنویس.'); return; }
-  state.subjects.push({id:uid(), name, color});
-  saveData(state);
-  $('#subjectName').value='';
-  renderSubjects();
-});
-
-// --- Tasks
-function renderKPIs(tasks){
-  const open = tasks.filter(t=>!t.completed).length;
-  const done = tasks.filter(t=>t.completed).length;
-  $('#kpiOpen').textContent = open;
-  $('#kpiDone').textContent = done;
-  const upcoming = tasks.filter(t=>!t.completed && t.due).sort((a,b)=> new Date(a.due) - new Date(b.due))[0];
-  $('#kpiNext').textContent = upcoming ? toPersianDateTime(upcoming.due) : '—';
-}
-
-function toPersianDateTime(dt){
-  const d = new Date(dt);
-  if (isNaN(d)) return '—';
-  try{
-    const date = d.toLocaleDateString('fa-IR', {weekday:'short', year:'numeric', month:'short', day:'numeric'});
-    const time = d.toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
-    return date + '، ' + time;
-  }catch(e){ return d.toISOString() }
-}
-
-function priorityBadge(p){
-  if(p==='high') return '<span class="badge" style="background:rgba(255,107,107,.15); border-color: rgba(255,107,107,.35); color:#ffd0d0">اولویت بالا</span>';
-  if(p==='low') return '<span class="badge" style="background:rgba(122,255,200,.12); border-color: rgba(122,255,200,.35); color:#d7ffef">کم</span>';
-  return '<span class="badge">معمولی</span>';
-}
-
-function applyFilters(tasks){
-  const q = $('#searchBox').value.trim().toLowerCase();
-  const subj = $('#filterSubject').value;
-  const status = $('#filterStatus').value;
-  let out = tasks.slice();
-
-  if(q){
-    out = out.filter(t => (t.title + ' ' + (t.notes||'') + ' ' + (t.members||'')).toLowerCase().includes(q));
-  }
-  if(subj){ out = out.filter(t => t.subjectId === subj); }
-  if(status){
-    const now = Date.now();
-    if(status==='open') out = out.filter(t => !t.completed);
-    if(status==='done') out = out.filter(t => t.completed);
-    if(status==='overdue') out = out.filter(t => !t.completed && t.due && new Date(t.due).getTime() < now);
-  }
-  const sortBy = $('#sortBy').value;
-  if(sortBy==='dueAsc') out.sort((a,b)=> (new Date(a.due||'2100-01-01') - new Date(b.due||'2100-01-01')));
-  if(sortBy==='dueDesc') out.sort((a,b)=> (new Date(b.due||'1970-01-01') - new Date(a.due||'1970-01-01')));
-  if(sortBy==='prio'){
-    const rank = {high:0, normal:1, low:2};
-    out.sort((a,b)=> (rank[a.priority||'normal'] - rank[b.priority||'normal']) || (new Date(a.due||'2100-01-01') - new Date(b.due||'2100-01-01')));
-  }
-  if(sortBy==='created') out.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
-
-  return out;
-}
-
-function subjectById(id){ return state.subjects.find(s=>s.id===id) }
-
-function renderTasks(){
-  const container = $('#tasksList');
-  const tasks = applyFilters(state.tasks);
-  renderKPIs(state.tasks);
-  container.innerHTML='';
-  if(tasks.length===0){ $('#emptyState').style.display='block'; return; }
-  $('#emptyState').style.display='none';
-
-  tasks.forEach(t => {
-    const s = subjectById(t.subjectId);
-    const due = t.due ? new Date(t.due) : null;
-    const overdue = !t.completed && due && (due.getTime() < Date.now());
-    const div = document.createElement('div');
-    div.className='task' + (overdue ? ' overdue' : '');
-
-    const left = document.createElement('div');
-    left.className='left';
-    const title = document.createElement('div');
-    title.className='title';
-    title.textContent = t.title;
-    left.appendChild(title);
-
-    const meta = document.createElement('div');
-    meta.className='meta';
-    if(s){
-      const sb = document.createElement('span');
-      sb.className='badge dot';
-      sb.innerHTML = '<span class="dot" style="background:'+s.color+'"></span>'+s.name;
-      meta.appendChild(sb);
+  <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+  <script>
+    // --- Utilities
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const storeKey = 'mashqyar:v1';
+    const notifiedKey = 'mashqyar:notified';
+    
+    function uid() { 
+      return 'id_' + Math.random().toString(36).slice(2, 10) 
     }
-    if(t.due){
-      const db = document.createElement('span');
-      db.className='badge'; db.textContent = 'موعد: ' + toPersianDateTime(t.due);
-      meta.appendChild(db);
+    
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(storeKey);
+        if (!raw) return { subjects: [], tasks: [] };
+        const data = JSON.parse(raw);
+        if (!data.subjects) data.subjects = [];
+        if (!data.tasks) data.tasks = [];
+        return data;
+      } catch (e) {
+        console.error(e);
+        return { subjects: [], tasks: [] };
+      }
     }
-    const pb = document.createElement('span');
-    pb.innerHTML = priorityBadge(t.priority||'normal');
-    meta.appendChild(pb);
-
-    if(t.members){
-      const mb = document.createElement('span');
-      mb.className='badge'; mb.textContent = 'اعضا: ' + t.members;
-      meta.appendChild(mb);
+    
+    function saveData(data) {
+      localStorage.setItem(storeKey, JSON.stringify(data));
     }
-    if(t.remindMinutes){
-      const rb = document.createElement('span');
-      rb.className='badge'; rb.textContent = 'یادآوری: ' + t.remindMinutes + 'دقیقه قبل';
-      meta.appendChild(rb);
+    
+    function showNotification(message, duration = 3000) {
+      const notification = $('#notification');
+      $('.notification-message').textContent = message;
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, duration);
     }
-    left.appendChild(meta);
-
-    if(t.notes){
-      const p = document.createElement('div');
-      p.className='muted small';
-      p.textContent = t.notes;
-      p.style.marginTop='6px';
-      left.appendChild(p);
+    
+    $('.notification-close').addEventListener('click', () => {
+      $('#notification').classList.remove('show');
+    });
+    
+    // --- Theme Toggle
+    const themeToggle = $('#themeToggle');
+    const body = document.body;
+    
+    // Check for saved theme preference or default to dark
+    const currentTheme = localStorage.getItem('theme') || 'dark';
+    if (currentTheme === 'light') {
+      body.classList.add('light-theme');
+      themeToggle.textContent = '☀️';
     }
-
-    const right = document.createElement('div');
-    right.className='right';
-    const doneBtn = document.createElement('button');
-    doneBtn.className='btn ' + (t.completed ? 'btn-ok' : 'btn-ghost');
-    doneBtn.textContent = t.completed ? 'برگردان به باز' : 'انجام شد';
-    doneBtn.addEventListener('click', ()=>{
-      t.completed = !t.completed;
+    
+    themeToggle.addEventListener('click', () => {
+      body.classList.toggle('light-theme');
+      const isLight = body.classList.contains('light-theme');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      themeToggle.textContent = isLight ? '☀️' : '🌙';
+    });
+    
+    // --- Initialize Persian Date Picker
+    $(document).ready(function() {
+      $("#taskDue").persianDatepicker({
+        format: 'YYYY/MM/DD',
+        observer: true,
+        initialValue: false,
+        autoClose: true,
+        position: 'auto'
+      });
+    });
+    
+    let state = loadData();
+    
+    // --- Subjects
+    function renderSubjects() {
+      const subjectSelect = $('#taskSubject');
+      const filterSubject = $('#filterSubject');
+      subjectSelect.innerHTML = '';
+      filterSubject.innerHTML = '<option value="">همه درس‌ها</option>';
+      
+      state.subjects.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id; 
+        opt.textContent = s.name;
+        subjectSelect.appendChild(opt);
+        
+        const opt2 = document.createElement('option');
+        opt2.value = s.id; 
+        opt2.textContent = s.name;
+        filterSubject.appendChild(opt2);
+      });
+      
+      const badges = $('#subjectsBadges');
+      badges.innerHTML = '';
+      state.subjects.forEach(s => {
+        const span = document.createElement('span');
+        span.className = 'subject-badge';
+        span.innerHTML = `<span class="subject-color" style="background:${s.color}"></span>${s.name}`;
+        badges.appendChild(span);
+      });
+    }
+    
+    renderSubjects();
+    
+    $('#addSubjectBtn').addEventListener('click', () => {
+      const name = $('#subjectName').value.trim();
+      const color = $('#subjectColor').value || '#4361ee';
+      if (!name) {
+        showNotification('نام درس را وارد کنید', 2000);
+        return;
+      }
+      
+      state.subjects.push({ id: uid(), name, color });
       saveData(state);
+      $('#subjectName').value = '';
+      renderSubjects();
+      showNotification('درس با موفقیت اضافه شد', 2000);
+    });
+    
+    // --- Tasks
+    function renderKPIs(tasks) {
+      const open = tasks.filter(t => !t.completed).length;
+      const done = tasks.filter(t => t.completed).length;
+      $('#kpiOpen').textContent = open;
+      $('#kpiDone').textContent = done;
+      
+      const upcoming = tasks
+        .filter(t => !t.completed && t.due)
+        .sort((a, b) => new Date(a.due) - new Date(b.due))[0];
+      
+      $('#kpiNext').textContent = upcoming ? toPersianDate(upcoming.due) : '—';
+    }
+    
+    function toPersianDate(dt) {
+      if (!dt) return '—';
+      try {
+        const date = new persianDate(new Date(dt));
+        return date.format('YYYY/MM/DD');
+      } catch (e) {
+        return '—';
+      }
+    }
+    
+    function toPersianDateTime(dt) {
+      if (!dt) return '—';
+      try {
+        const date = new persianDate(new Date(dt));
+        return date.format('YYYY/MM/DD HH:mm');
+      } catch (e) {
+        return '—';
+      }
+    }
+    
+    function priorityBadge(p) {
+      if (p === 'high') return '<span class="task-badge priority-high">اولویت بالا</span>';
+      if (p === 'low') return '<span class="task-badge priority-low">اولویت کم</span>';
+      return '<span class="task-badge">معمولی</span>';
+    }
+    
+    function applyFilters(tasks) {
+      const q = $('#searchBox').value.trim().toLowerCase();
+      const subj = $('#filterSubject').value;
+      const status = $('#filterStatus').value;
+      let out = tasks.slice();
+      
+      if (q) {
+        out = out.filter(t => 
+          (t.title + ' ' + (t.notes || '') + ' ' + (t.members || '')).toLowerCase().includes(q)
+        );
+      }
+      
+      if (subj) { 
+        out = out.filter(t => t.subjectId === subj); 
+      }
+      
+      if (status) {
+        const now = Date.now();
+        if (status === 'open') out = out.filter(t => !t.completed);
+        if (status === 'done') out = out.filter(t => t.completed);
+        if (status === 'overdue') out = out.filter(t => !t.completed && t.due && new Date(t.due).getTime() < now);
+      }
+      
+      const sortBy = $('#sortBy').value;
+      if (sortBy === 'dueAsc') out.sort((a, b) => (new Date(a.due || '2100-01-01') - new Date(b.due || '2100-01-01')));
+      if (sortBy === 'dueDesc') out.sort((a, b) => (new Date(b.due || '1970-01-01') - new Date(a.due || '1970-01-01')));
+      if (sortBy === 'prio') {
+        const rank = { high: 0, normal: 1, low: 2 };
+        out.sort((a, b) => 
+          (rank[a.priority || 'normal'] - rank[b.priority || 'normal']) || 
+          (new Date(a.due || '2100-01-01') - new Date(b.due || '2100-01-01'))
+        );
+      }
+      if (sortBy === 'created') out.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      return out;
+    }
+    
+    function subjectById(id) { 
+      return state.subjects.find(s => s.id === id) 
+    }
+    
+    function renderTasks() {
+      const container = $('#tasksList');
+      const tasks = applyFilters(state.tasks);
+      renderKPIs(state.tasks);
+      container.innerHTML = '';
+      
+      if (tasks.length === 0) { 
+        $('#emptyState').style.display = 'block'; 
+        return; 
+      }
+      
+      $('#emptyState').style.display = 'none';
+      
+      tasks.forEach(t => {
+        const s = subjectById(t.subjectId);
+        const due = t.due ? new Date(t.due) : null;
+        const overdue = !t.completed && due && (due.getTime() < Date.now());
+        
+        const div = document.createElement('div');
+        div.className = 'task-item' + (overdue ? ' overdue' : '');
+        
+        const content = document.createElement('div');
+        content.className = 'task-content';
+        
+        const title = document.createElement('h3');
+        title.textContent = t.title;
+        content.appendChild(title);
+        
+        const meta = document.createElement('div');
+        meta.className = 'task-meta';
+        
+        if (s) {
+          const sb = document.createElement('span');
+          sb.className = 'task-badge';
+          sb.innerHTML = `<span class="subject-color" style="background:${s.color}"></span>${s.name}`;
+          meta.appendChild(sb);
+        }
+        
+        if (t.due) {
+          const db = document.createElement('span');
+          db.className = 'task-badge';
+          db.textContent = 'موعد: ' + toPersianDateTime(t.due);
+          meta.appendChild(db);
+        }
+        
+        const pb = document.createElement('span');
+        pb.innerHTML = priorityBadge(t.priority || 'normal');
+        meta.appendChild(pb);
+        
+        if (t.members) {
+          const mb = document.createElement('span');
+          mb.className = 'task-badge';
+          mb.textContent = 'اعضا: ' + t.members;
+          meta.appendChild(mb);
+        }
+        
+        content.appendChild(meta);
+        
+        if (t.notes) {
+          const desc = document.createElement('div');
+          desc.className = 'task-description';
+          desc.textContent = t.notes;
+          content.appendChild(desc);
+        }
+        
+        const actions = document.createElement('div');
+        actions.className = 'task-actions';
+        
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'task-btn complete';
+        doneBtn.innerHTML = t.completed ? '↩️' : '✓';
+        doneBtn.title = t.completed ? 'برگردان به باز' : 'انجام شد';
+        doneBtn.addEventListener('click', () => {
+          t.completed = !t.completed;
+          saveData(state);
+          renderTasks();
+          showNotification(t.completed ? 'تکلیف انجام شد' : 'تکلیف به حالت باز بازگشت', 2000);
+        });
+        actions.appendChild(doneBtn);
+        
+        const editBtn = document.createElement('button');
+        editBtn.className = 'task-btn';
+        editBtn.innerHTML = '✏️';
+        editBtn.title = 'ویرایش';
+        editBtn.addEventListener('click', () => editTask(t.id));
+        actions.appendChild(editBtn);
+        
+        const delBtn = document.createElement('button');
+        delBtn.className = 'task-btn';
+        delBtn.innerHTML = '🗑️';
+        delBtn.title = 'حذف';
+        delBtn.addEventListener('click', () => {
+          if (confirm('این تکلیف حذف شود؟')) {
+            state.tasks = state.tasks.filter(x => x.id !== t.id);
+            saveData(state);
+            renderTasks();
+            showNotification('تکلیف حذف شد', 2000);
+          }
+        });
+        actions.appendChild(delBtn);
+        
+        div.appendChild(content);
+        div.appendChild(actions);
+        container.appendChild(div);
+      });
+    }
+    
+    renderTasks();
+    
+    function editTask(id) {
+      const t = state.tasks.find(x => x.id === id);
+      if (!t) return;
+      
+      $('#taskTitle').value = t.title;
+      $('#taskSubject').value = t.subjectId || '';
+      
+      if (t.due) {
+        const date = new persianDate(new Date(t.due));
+        $('#taskDue').value = date.format('YYYY/MM/DD');
+        
+        const time = new Date(t.due);
+        $('#taskTime').value = time.toTimeString().slice(0, 5);
+      } else {
+        $('#taskDue').value = '';
+        $('#taskTime').value = '';
+      }
+      
+      $('#taskRemind').value = t.remindMinutes || '';
+      $('#taskPriority').value = t.priority || 'normal';
+      $('#taskMembers').value = t.members || '';
+      $('#taskNotes').value = t.notes || '';
+      
+      // Overwrite by saving with same id
+      $('#addTaskBtn').textContent = 'ذخیره تغییرات';
+      $('#addTaskBtn').dataset.editId = id;
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    $('#addTaskBtn').addEventListener('click', () => {
+      const title = $('#taskTitle').value.trim();
+      const subjectId = $('#taskSubject').value || '';
+      const dateStr = $('#taskDue').value;
+      const timeStr = $('#taskTime').value;
+      
+      let due = null;
+      if (dateStr) {
+        // Convert Persian date to Gregorian
+        const pd = new persianDate(dateStr);
+        const gDate = pd.toCalendar('gregorian').toDate();
+        
+        if (timeStr) {
+          const [hours, minutes] = timeStr.split(':');
+          gDate.setHours(parseInt(hours), parseInt(minutes));
+        }
+        
+        due = gDate.toISOString();
+      }
+      
+      const remindMinutes = parseInt($('#taskRemind').value || '0', 10) || 0;
+      const priority = $('#taskPriority').value || 'normal';
+      const members = $('#taskMembers').value.trim();
+      const notes = $('#taskNotes').value.trim();
+      
+      if (!title) {
+        showNotification('عنوان تکلیف را وارد کنید', 2000);
+        return;
+      }
+      
+      const editId = $('#addTaskBtn').dataset.editId;
+      if (editId) {
+        const t = state.tasks.find(x => x.id === editId);
+        if (t) {
+          t.title = title; 
+          t.subjectId = subjectId; 
+          t.due = due;
+          t.remindMinutes = remindMinutes; 
+          t.priority = priority; 
+          t.members = members; 
+          t.notes = notes;
+        }
+        $('#addTaskBtn').textContent = 'ثبت تکلیف';
+        delete $('#addTaskBtn').dataset.editId;
+        showNotification('تکلیف با موفقیت ویرایش شد', 2000);
+      } else {
+        state.tasks.push({
+          id: uid(),
+          title, 
+          subjectId,
+          due,
+          remindMinutes, 
+          priority, 
+          members, 
+          notes,
+          completed: false,
+          createdAt: new Date().toISOString()
+        });
+        showNotification('تکلیف با موفقیت ثبت شد', 2000);
+      }
+      
+      saveData(state);
+      clearTaskForm();
       renderTasks();
     });
-    right.appendChild(doneBtn);
-
-    const editBtn = document.createElement('button');
-    editBtn.className='btn btn-ghost';
-    editBtn.textContent = 'ویرایش';
-    editBtn.addEventListener('click', ()=> editTask(t.id));
-    right.appendChild(editBtn);
-
-    const delBtn = document.createElement('button');
-    delBtn.className='btn btn-danger';
-    delBtn.textContent = 'حذف';
-    delBtn.addEventListener('click', ()=>{
-      if(confirm('این تکلیف حذف شود؟')){
-        state.tasks = state.tasks.filter(x=>x.id!==t.id);
-        saveData(state);
+    
+    function clearTaskForm() {
+      $('#taskTitle').value = '';
+      $('#taskSubject').value = state.subjects[0]?.id || '';
+      $('#taskDue').value = '';
+      $('#taskTime').value = '';
+      $('#taskRemind').value = '';
+      $('#taskPriority').value = 'normal';
+      $('#taskMembers').value = '';
+      $('#taskNotes').value = '';
+    }
+    
+    ['#searchBox', '#filterSubject', '#filterStatus', '#sortBy'].forEach(sel => {
+      $(sel).addEventListener('input', renderTasks);
+      $(sel).addEventListener('change', renderTasks);
+    });
+    
+    // --- Notifications
+    $('#requestNotifyBtn')?.addEventListener('click', async () => {
+      if (!('Notification' in window)) { 
+        showNotification('مرورگر شما از اعلان پشتیبانی نمی‌کند', 2000);
+        return; 
+      }
+      
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') { 
+        showNotification('برای اعلان‌ها باید اجازه بدهید', 2000);
+        return; 
+      }
+      
+      new Notification('مشق‌یار فعال شد ✅', { 
+        body: 'از این پس نزدیک موعد، اعلان می‌گیرید (تا زمانی که صفحه باز باشد).' 
+      });
+      
+      showNotification('اعلان‌ها با موفقیت فعال شد', 2000);
+    });
+    
+    function loadNotifiedSet() {
+      try {
+        const raw = localStorage.getItem(notifiedKey);
+        if (!raw) return new Set();
+        return new Set(JSON.parse(raw));
+      } catch { 
+        return new Set() 
+      }
+    }
+    
+    function saveNotifiedSet(set) {
+      localStorage.setItem(notifiedKey, JSON.stringify(Array.from(set)));
+    }
+    
+    let notified = loadNotifiedSet();
+    
+    function checkReminders() {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      
+      const now = Date.now();
+      state.tasks.forEach(t => {
+        if (t.completed || !t.due || !t.remindMinutes) return;
+        
+        const dueTs = new Date(t.due).getTime();
+        const triggerTs = dueTs - t.remindMinutes * 60 * 1000;
+        
+        if (now >= triggerTs && now <= dueTs && !notified.has(t.id)) {
+          const subject = subjectById(t.subjectId);
+          const body = (subject ? ('درس ' + subject.name + ' — ') : '') + 'زمان تحویل: ' + toPersianDateTime(t.due);
+          
+          new Notification('یادآوری تکلیف: ' + t.title, { body });
+          notified.add(t.id);
+          saveNotifiedSet(notified);
+        }
+      });
+    }
+    
+    setInterval(checkReminders, 60 * 1000); // هر دقیقه
+    document.addEventListener('visibilitychange', () => { 
+      if (!document.hidden) checkReminders(); 
+    });
+    
+    // --- Export / Import JSON
+    $('#exportJsonBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; 
+      a.download = 'mashqyar_data.json'; 
+      a.click();
+      URL.revokeObjectURL(url);
+      showNotification('خروجی JSON با موفقیت ایجاد شد', 2000);
+    });
+    
+    $('#importJsonBtn').addEventListener('click', () => $('#importFile').click());
+    
+    $('#importFile').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (!data || !Array.isArray(data.subjects) || !Array.isArray(data.tasks)) 
+            throw new Error('فرمت نامعتبر');
+          
+          state = data;
+          saveData(state);
+          renderSubjects(); 
+          renderTasks();
+          showNotification('داده‌ها با موفقیت وارد شد', 2000);
+        } catch (err) {
+          showNotification('خطا در ورودی JSON: ' + err.message, 3000);
+        }
+      };
+      
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+    
+    // --- Export ICS
+    function formatICSDate(dt) {
+      const d = new Date(dt);
+      const y = d.getUTCFullYear();
+      const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(d.getUTCDate()).padStart(2, '0');
+      const h = String(d.getUTCHours()).padStart(2, '0');
+      const min = String(d.getUTCMinutes()).padStart(2, '0');
+      const s = String(d.getUTCSeconds()).padStart(2, '0');
+      return `${y}${m}${day}T${h}${min}${s}Z`;
+    }
+    
+    $('#exportIcsBtn').addEventListener('click', () => {
+      const lines = [];
+      lines.push('BEGIN:VCALENDAR');
+      lines.push('VERSION:2.0');
+      lines.push('PRODID:-//MashqYar//fa-IR//');
+      const now = formatICSDate(new Date());
+      
+      state.tasks.filter(t => !t.completed && t.due).forEach(t => {
+        const uid = t.id + '@mashqyar';
+        const summary = 'تکلیف: ' + t.title;
+        const desc = (t.notes || '') + (t.members ? (' | اعضا: ' + t.members) : '');
+        
+        lines.push('BEGIN:VEVENT');
+        lines.push('UID:' + uid);
+        lines.push('DTSTAMP:' + now);
+        lines.push('DTSTART:' + formatICSDate(t.due));
+        lines.push('SUMMARY:' + summary.replace(/\r?\n/g, ' '));
+        if (desc) lines.push('DESCRIPTION:' + desc.replace(/\r?\n/g, ' '));
+        lines.push('END:VEVENT');
+      });
+      
+      lines.push('END:VCALENDAR');
+      const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; 
+      a.download = 'mashqyar_tasks.ics'; 
+      a.click();
+      URL.revokeObjectURL(url);
+      showNotification('خروجی تقویم با موفقیت ایجاد شد', 2000);
+    });
+    
+    // --- Clear All
+    $('#clearBtn').addEventListener('click', () => {
+      if (confirm('کل داده‌های محلی حذف شود؟')) {
+        localStorage.removeItem(storeKey);
+        localStorage.removeItem(notifiedKey);
+        state = { subjects: [], tasks: [] };
+        renderSubjects(); 
         renderTasks();
+        showNotification('تمام داده‌ها با موفقیت حذف شد', 2000);
       }
     });
-    right.appendChild(delBtn);
-
-    div.appendChild(left);
-    div.appendChild(right);
-    container.appendChild(div);
-  });
-}
-renderTasks();
-
-function editTask(id){
-  const t = state.tasks.find(x=>x.id===id);
-  if(!t) return;
-  $('#taskTitle').value = t.title;
-  $('#taskSubject').value = t.subjectId || '';
-  $('#taskDue').value = t.due ? new Date(t.due).toISOString().slice(0,16) : '';
-  $('#taskRemind').value = t.remindMinutes || '';
-  $('#taskPriority').value = t.priority || 'normal';
-  $('#taskMembers').value = t.members || '';
-  $('#taskNotes').value = t.notes || '';
-  // Overwrite by saving with same id
-  $('#addTaskBtn').textContent = 'ذخیره تغییرات';
-  $('#addTaskBtn').dataset.editId = id;
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-$('#addTaskBtn').addEventListener('click', () => {
-  const title = $('#taskTitle').value.trim();
-  const subjectId = $('#taskSubject').value || '';
-  const due = $('#taskDue').value ? new Date($('#taskDue').value) : null;
-  const remindMinutes = parseInt($('#taskRemind').value || '0', 10) || 0;
-  const priority = $('#taskPriority').value || 'normal';
-  const members = $('#taskMembers').value.trim();
-  const notes = $('#taskNotes').value.trim();
-
-  if(!title){ alert('عنوان تکلیف را بنویس.'); return; }
-
-  const editId = $('#addTaskBtn').dataset.editId;
-  if(editId){
-    const t = state.tasks.find(x=>x.id===editId);
-    if(t){
-      t.title=title; t.subjectId=subjectId; t.due= due? due.toISOString():'';
-      t.remindMinutes=remindMinutes; t.priority=priority; t.members=members; t.notes=notes;
-    }
-    $('#addTaskBtn').textContent='ثبت تکلیف';
-    delete $('#addTaskBtn').dataset.editId;
-  }else{
-    state.tasks.push({
-      id: uid(),
-      title, subjectId,
-      due: due? due.toISOString(): '',
-      remindMinutes, priority, members, notes,
-      completed:false,
-      createdAt:new Date().toISOString()
-    });
-  }
-
-  saveData(state);
-  clearTaskForm();
-  renderTasks();
-});
-
-function clearTaskForm(){
-  $('#taskTitle').value='';
-  $('#taskSubject').value = state.subjects[0]?.id || '';
-  $('#taskDue').value='';
-  $('#taskRemind').value='';
-  $('#taskPriority').value='normal';
-  $('#taskMembers').value='';
-  $('#taskNotes').value='';
-}
-
-['#searchBox','#filterSubject','#filterStatus','#sortBy'].forEach(sel => {
-  $(sel).addEventListener('input', renderTasks);
-  $(sel).addEventListener('change', renderTasks);
-});
-
-// --- Notifications
-$('#requestNotifyBtn').addEventListener('click', async () => {
-  if(!('Notification' in window)){ alert('مرورگر شما از اعلان پشتیبانی نمی‌کند.'); return; }
-  const perm = await Notification.requestPermission();
-  if(perm!=='granted'){ alert('برای اعلان‌ها باید اجازه بدهی.'); return; }
-  new Notification('مشق‌یار فعال شد ✅', { body:'از این پس نزدیک موعد، اعلان می‌گیری (تا زمانی که صفحه باز باشد).' });
-});
-
-function loadNotifiedSet(){
-  try{
-    const raw = localStorage.getItem(notifiedKey);
-    if(!raw) return new Set();
-    return new Set(JSON.parse(raw));
-  }catch{ return new Set() }
-}
-function saveNotifiedSet(set){
-  localStorage.setItem(notifiedKey, JSON.stringify(Array.from(set)));
-}
-let notified = loadNotifiedSet();
-
-function checkReminders(){
-  if(!('Notification' in window) || Notification.permission!=='granted') return;
-  const now = Date.now();
-  state.tasks.forEach(t => {
-    if(t.completed || !t.due || !t.remindMinutes) return;
-    const dueTs = new Date(t.due).getTime();
-    const triggerTs = dueTs - t.remindMinutes*60*1000;
-    if(now >= triggerTs && now <= dueTs && !notified.has(t.id)){
-      const subject = subjectById(t.subjectId);
-      const body = (subject? ('درس '+subject.name+' — ') : '') + 'زمان تحویل: ' + toPersianDateTime(t.due);
-      new Notification('یادآوری تکلیف: ' + t.title, { body });
-      notified.add(t.id);
-      saveNotifiedSet(notified);
-    }
-  });
-}
-setInterval(checkReminders, 60*1000); // هر دقیقه
-document.addEventListener('visibilitychange', () => { if(!document.hidden) checkReminders(); });
-
-// --- Export / Import JSON
-$('#exportJsonBtn').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'mashqyar_data.json'; a.click();
-  URL.revokeObjectURL(url);
-});
-
-$('#importJsonBtn').addEventListener('click', ()=> $('#importFile').click());
-$('#importFile').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    try{
-      const data = JSON.parse(reader.result);
-      if(!data || !Array.isArray(data.subjects) || !Array.isArray(data.tasks)) throw new Error('فرمت نامعتبر');
-      state = data;
+    
+    // Seed example on first run
+    if (state.subjects.length === 0 && state.tasks.length === 0) {
+      state.subjects = [
+        { id: uid(), name: 'ریاضی', color: '#4361ee' },
+        { id: uid(), name: 'علوم', color: '#3a0ca3' },
+        { id: uid(), name: 'ادبیات', color: '#f72585' }
+      ];
+      
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const dayAfter = new Date();
+      dayAfter.setDate(dayAfter.getDate() + 2);
+      
+      state.tasks = [
+        { 
+          id: uid(), 
+          title: 'حل تمرین ۱ تا ۱۰', 
+          subjectId: state.subjects[0].id, 
+          due: tomorrow.toISOString(), 
+          remindMinutes: 120, 
+          priority: 'high', 
+          members: '', 
+          notes: 'دفتر حل لازم است', 
+          completed: false, 
+          createdAt: new Date().toISOString() 
+        },
+        { 
+          id: uid(), 
+          title: 'خلاصه‌نویسی فصل گیاهان', 
+          subjectId: state.subjects[1].id, 
+          due: dayAfter.toISOString(), 
+          remindMinutes: 60, 
+          priority: 'normal', 
+          members: 'علی، زهرا', 
+          notes: 'با تصاویر', 
+          completed: false, 
+          createdAt: new Date().toISOString() 
+        }
+      ];
+      
       saveData(state);
-      renderSubjects(); renderTasks();
-      alert('داده‌ها با موفقیت وارد شد ✅');
-    }catch(err){
-      alert('خطا در ورودی JSON: ' + err.message);
+      renderSubjects(); 
+      renderTasks();
     }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
-});
-
-// --- Export ICS
-function formatICSDate(dt){
-  const d = new Date(dt);
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth()+1).padStart(2,'0');
-  const day = String(d.getUTCDate()).padStart(2,'0');
-  const h = String(d.getUTCHours()).padStart(2,'0');
-  const min = String(d.getUTCMinutes()).padStart(2,'0');
-  const s = String(d.getUTCSeconds()).padStart(2,'0');
-  return `${y}${m}${day}T${h}${min}${s}Z`;
-}
-$('#exportIcsBtn').addEventListener('click', () => {
-  const lines = [];
-  lines.push('BEGIN:VCALENDAR');
-  lines.push('VERSION:2.0');
-  lines.push('PRODID:-//MashqYar//fa-IR//');
-  const now = formatICSDate(new Date());
-  state.tasks.filter(t=>!t.completed && t.due).forEach(t => {
-    const uid = t.id + '@mashqyar';
-    const summary = 'تکلیف: ' + t.title;
-    const desc = (t.notes || '') + (t.members ? (' | اعضا: '+t.members) : '');
-    lines.push('BEGIN:VEVENT');
-    lines.push('UID:' + uid);
-    lines.push('DTSTAMP:' + now);
-    lines.push('DTSTART:' + formatICSDate(t.due));
-    lines.push('SUMMARY:' + summary.replace(/\r?\n/g, ' '));
-    if(desc) lines.push('DESCRIPTION:' + desc.replace(/\r?\n/g, ' '));
-    lines.push('END:VEVENT');
-  });
-  lines.push('END:VCALENDAR');
-  const blob = new Blob([lines.join('\r\n')], {type:'text/calendar'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'mashqyar_tasks.ics'; a.click();
-  URL.revokeObjectURL(url);
-});
-
-// --- Clear All
-$('#clearBtn').addEventListener('click', ()=>{
-  if(confirm('کل داده‌های محلی حذف شود؟')){
-    localStorage.removeItem(storeKey);
-    localStorage.removeItem(notifiedKey);
-    state = {subjects:[], tasks:[]};
-    renderSubjects(); renderTasks();
-  }
-});
-
-// Seed example on first run
-if(state.subjects.length===0 && state.tasks.length===0){
-  state.subjects = [
-    {id: uid(), name:'ریاضی', color:'#4e9eff'},
-    {id: uid(), name:'علوم', color:'#6ae6b9'},
-    {id: uid(), name:'ادبیات', color:'#ffb84d'}
-  ];
-  state.tasks = [
-    {id: uid(), title:'حل تمرین ۱ تا ۱۰', subjectId: state.subjects[0].id, due:new Date(Date.now()+36e5*24).toISOString(), remindMinutes:120, priority:'high', members:'', notes:'دفتر حل لازم است', completed:false, createdAt:new Date().toISOString()},
-    {id: uid(), title:'خلاصه‌نویسی فصل گیاهان', subjectId: state.subjects[1].id, due:new Date(Date.now()+36e5*48).toISOString(), remindMinutes:60, priority:'normal', members:'علی، زهرا', notes:'با تصاویر', completed:false, createdAt:new Date().toISOString()}
-  ];
-  saveData(state);
-  renderSubjects(); renderTasks();
-}
-</script>
+  </script>
 </body>
 </html>
