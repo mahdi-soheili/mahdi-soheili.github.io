@@ -1,115 +1,636 @@
-<!DOCTYPE html>
-<html lang="en">
+# Create the MashqYar single-file web app (RTL, Persian labels, localStorage, notifications, JSON/ICS export)
+html_content = r"""<!DOCTYPE html>
+<html lang="fa" dir="rtl">
 <head>
-<title>mahdi soheili</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>مشق‌یار – یادآور تکالیف دانش‌آموزی</title>
 <style>
-* {
-box-sizing: border-box;
-}
-body {
-font-family: Arial, Helvetica, sans-serif;
-margin: 0;
-}
-.header {
-padding: 80px;
-text-align: center;
-background: #1abc9c;
-color: white;
-}
-.header h1 {
-font-size: 40px;
-}
-.navbar {
-overflow: hidden;
-background-color: #333;
-position: sticky;
-position: -webkit-sticky;
-top: 0;
-}
-.navbar a {
-float: left;
-display: block;
-color: white;
-text-align: center;
-padding: 14px 20px;
-text-decoration: none;
-}
-.navbar a.right {
-float: right;
-}
-.navbar a:hover {
-background-color: #ddd;
-color: black;
-}
-.navbar a.active {
-background-color: #666;
-color: white;
-}
-.row {
-display: -ms-flexbox; /* IE10 */
-display: flex;
--ms-flex-wrap: wrap; /* IE10 */
-flex-wrap: wrap;
-}
-.side {
--ms-flex: 30%; /* IE10 */
-flex: 30%;
-background-color: #f1f1f1;
-padding: 20px;
-}
-.main {
--ms-flex: 70%; /* IE10 */
-flex: 70%;
-background-color: white;
-padding: 20px;
-}
-.fakeimg {
-background-color: #aaa;
-width: 100%;
-padding: 20px;
-}
-.footer {
-padding: 20px;
-text-align: center;
-background: #ddd;
-}
-@media screen and (max-width: 700px) {
-.row {
-flex-direction: column;
-}
-}
-h2 {
-text-align:right
+  :root{
+    --bg:#0b1324;
+    --card:#101a33;
+    --muted:#a8b3cf;
+    --text:#e7ecf8;
+    --accent:#4e9eff;
+    --accent-2:#6ae6b9;
+    --danger:#ff6b6b;
+    --warn:#ffb84d;
+    --ok:#76e39f;
+    --shadow: 0 10px 25px rgba(0,0,0,.35);
+    --radius: 16px;
   }
-@media screen and (max-width: 400px) {
-.navbar a {
-float: none;
-width: 100%;
-}
-}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: Vazirmatn, Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    background: radial-gradient(1200px 800px at 100% -10%, #18264e, var(--bg));
+    color:var(--text);
+  }
+  header{
+    padding:20px 16px;
+    position:sticky; top:0; z-index:100;
+    background: linear-gradient(180deg, rgba(11,19,36,.95), rgba(11,19,36,.65) 60%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .wrap{max-width:1050px; margin:0 auto; padding:0 12px;}
+  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.4px}
+  .logo{
+    width:38px;height:38px; border-radius:12px;
+    background: conic-gradient(from 220deg, var(--accent), var(--accent-2));
+    box-shadow: 0 8px 24px rgba(78,158,255,.35), inset 0 0 12px rgba(255,255,255,.2);
+  }
+  .brand h1{font-size:20px; margin:0}
+  .pill{
+    font-size:12px; padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.07); color:var(--muted); border:1px solid rgba(255,255,255,.1)
+  }
+  .grid{
+    display:grid; gap:14px; grid-template-columns: 1fr 2fr;
+  }
+  @media (max-width:900px){ .grid{ grid-template-columns: 1fr } }
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.00));
+    border:1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .card h2{margin:0; font-size:16px; color:#dbe6ff}
+  .card .head{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.07)}
+  .card .body{padding:14px 16px}
+  .muted{color:var(--muted); font-size:13px}
+  label{font-size:13px; color:#cdd7f1}
+  input, select, textarea, button{
+    width:100%; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.12);
+    background:#0f1831; color:var(--text); outline:none;
+  }
+  input::placeholder, textarea::placeholder{color:#8da0ca}
+  .row-2{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+  .row-3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px}
+  .actions{display:flex; gap:8px; flex-wrap:wrap}
+  .btn{cursor:pointer; transition:.2s transform, .2s opacity; font-weight:600}
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .btn-accent{background: linear-gradient(90deg, var(--accent), #7fb4ff); border:none; color:#08213d}
+  .btn-ghost{background: rgba(255,255,255,.06)}
+  .btn-danger{background: linear-gradient(90deg, #ff7a7a, #ff5e5e); border:none; color:#3d0a0a}
+  .btn-ok{background: linear-gradient(90deg, #7ff0b9, #55d699); border:none; color:#0d3126}
+  .list{display:flex; flex-direction:column; gap:10px}
+  .task{
+    display:grid; gap:10px; grid-template-columns: 1fr auto; align-items:center;
+    padding:12px; border-radius:14px; border:1px solid rgba(255,255,255,.09);
+    background: rgba(255,255,255,.03);
+  }
+  .task.overdue{border-color: rgba(255,0,0,.35); box-shadow: inset 0 0 0 1px rgba(255,0,0,.15)}
+  .task .meta{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+  .badge{font-size:11px; padding:5px 9px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09); color:#dbe6ff}
+  .badge.dot{display:inline-flex; align-items:center; gap:8px}
+  .dot{width:10px; height:10px; border-radius:999px; display:inline-block}
+  .title{font-weight:700; margin-bottom:6px}
+  .task .left{min-width:0}
+  .task .right{display:flex; gap:6px}
+  .section-title{margin:18px 0 10px; font-size:14px; color:#cfe0ff}
+  .hr{height:1px; background: rgba(255,255,255,.06); margin:8px 0 14px}
+  .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  .search{flex:1}
+  .empty{padding:18px; color:var(--muted); text-align:center}
+  .footer{padding:18px; font-size:12px; color:var(--muted); text-align:center}
+  .link{color:#cfe0ff; text-decoration: none; border-bottom:1px dotted #8ea8ff}
+  .kpi{display:flex; gap:10px; flex-wrap:wrap}
+  .kpi .box{flex:1; min-width:120px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); padding:10px 12px; border-radius:12px}
+  .box b{display:block; font-size:18px; margin-top:4px}
+  .divider{height:12px}
+  .small{font-size:12px}
+  .toggle{display:flex; align-items:center; gap:8px}
+  .toggle input{width:18px; height:18px}
 </style>
 </head>
 <body>
+  <header>
+    <div class="wrap row">
+      <div class="brand">
+        <div class="logo"></div>
+        <h1>مشق‌یار</h1>
+        <span class="pill">یادآور تکالیف دانش‌آموزی</span>
+      </div>
+      <div class="actions" style="margin-inline-start:auto">
+        <button id="exportJsonBtn" class="btn btn-ghost">خروجی JSON</button>
+        <button id="importJsonBtn" class="btn btn-ghost">ورودی JSON</button>
+        <input id="importFile" type="file" accept=".json" style="display:none">
+        <button id="exportIcsBtn" class="btn btn-ghost">خروجی تقویم ICS</button>
+        <button id="clearBtn" class="btn btn-danger">حذف همه داده‌ها</button>
+      </div>
+    </div>
+  </header>
 
-<div class="header">
-<h1>mohammad mahdi soheili</h1>
-<p style="font-weight: bold">آموزش رایگان کامپیوتر و برنامه نویسی</p>
-</div>
+  <main class="wrap" style="padding:16px 12px 32px">
+    <div class="grid">
+      <!-- Left: Forms -->
+      <section class="card">
+        <div class="head">
+          <h2>افزودن درس و تکلیف</h2>
+        </div>
+        <div class="body">
+          <div class="section-title">۱) تعریف درس</div>
+          <div class="row-3">
+            <div><label>نام درس</label><input id="subjectName" placeholder="مثلاً ریاضی"></div>
+            <div><label>رنگ</label><input id="subjectColor" type="color" value="#4e9eff"></div>
+            <div style="display:flex; align-items:flex-end"><button id="addSubjectBtn" class="btn btn-ok">افزودن درس</button></div>
+          </div>
+          <div class="hr"></div>
+          <div id="subjectsBadges" class="toolbar"></div>
 
-<div class="navbar">
-<a href="#" class="active">Home</a>
-<a href="#">Link</a>
-<a href="#">Link</a>
-<a href="#" class="right">Link</a>
-</div>
-<h1> i'm mohammad mahdi soheili</h1>
-<div class="main">
-<h2>من محمد مهدی سهیلی هستم</h2>
-<br>
-</div>
-</div>
+          <div class="divider"></div>
+          <div class="section-title">۲) افزودن تکلیف</div>
+          <div class="row-2">
+            <div><label>عنوان تکلیف</label><input id="taskTitle" placeholder="حل تمرین فصل ۲"></div>
+            <div><label>درس</label>
+              <select id="taskSubject"></select>
+            </div>
+          </div>
+          <div class="row-3">
+            <div><label>تاریخ و ساعت تحویل</label><input id="taskDue" type="datetime-local"></div>
+            <div><label>یادآوری (دقیقه قبل از موعد)</label><input id="taskRemind" type="number" placeholder="مثلاً 120"></div>
+            <div>
+              <label>اولویت</label>
+              <select id="taskPriority">
+                <option value="normal">معمولی</option>
+                <option value="high">بالا</option>
+                <option value="low">کم</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label>اعضای گروه (اختیاری)</label>
+            <input id="taskMembers" placeholder="مثلاً: علی، سارا">
+          </div>
+          <div>
+            <label>توضیحات</label>
+            <textarea id="taskNotes" rows="3" placeholder="توضیحات تکلیف..."></textarea>
+          </div>
+          <div class="actions" style="margin-top:10px">
+            <button id="addTaskBtn" class="btn btn-accent">ثبت تکلیف</button>
+            <button id="requestNotifyBtn" class="btn btn-ghost">فعال‌سازی اعلان‌ها</button>
+          </div>
 
+          <div class="divider"></div>
+          <div class="kpi">
+            <div class="box small">تکالیف باز<b id="kpiOpen">0</b></div>
+            <div class="box small">تکمیل‌شده<b id="kpiDone">0</b></div>
+            <div class="box small">نزدیک‌ترین موعد<b id="kpiNext">—</b></div>
+          </div>
+        </div>
+      </section>
 
-</body>/.
+      <!-- Right: List -->
+      <section class="card">
+        <div class="head">
+          <h2>تکالیف من</h2>
+          <div class="toolbar" style="margin-inline-start:auto">
+            <input id="searchBox" class="search" placeholder="جستجو در عنوان/توضیحات/اعضا...">
+            <select id="filterSubject"><option value="">همه درس‌ها</option></select>
+            <select id="filterStatus">
+              <option value="">وضعیت</option>
+              <option value="open">باز</option>
+              <option value="done">انجام‌شده</option>
+              <option value="overdue">عقب‌افتاده</option>
+            </select>
+            <select id="sortBy">
+              <option value="dueAsc">نزدیک‌ترین موعد</option>
+              <option value="dueDesc">دورترین موعد</option>
+              <option value="prio">اولویت</option>
+              <option value="created">تاریخ ایجاد</option>
+            </select>
+          </div>
+        </div>
+        <div class="body">
+          <div id="tasksList" class="list"></div>
+          <div id="emptyState" class="empty" style="display:none">هنوز تکلیفی ثبت نشده. از فرم سمت راست اضافه کن ✍️</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer">
+      ساخته‌شده با ❤️ برای دانش‌آموزان — نسخهٔ آزمایشی محلی (داده‌ها در مرورگر شما ذخیره می‌شود)
+    </div>
+  </main>
+
+<script>
+// --- Utilities
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+const storeKey = 'mashqyar:v1';
+const notifiedKey = 'mashqyar:notified';
+
+function uid(){ return 'id_' + Math.random().toString(36).slice(2,10) }
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(storeKey);
+    if(!raw) return {subjects:[], tasks:[]};
+    const data = JSON.parse(raw);
+    if(!data.subjects) data.subjects = [];
+    if(!data.tasks) data.tasks = [];
+    return data;
+  }catch(e){
+    console.error(e);
+    return {subjects:[], tasks:[]};
+  }
+}
+function saveData(data){
+  localStorage.setItem(storeKey, JSON.stringify(data));
+}
+
+let state = loadData();
+
+// --- Subjects
+function renderSubjects(){
+  const subjectSelect = $('#taskSubject');
+  const filterSubject = $('#filterSubject');
+  subjectSelect.innerHTML = '';
+  filterSubject.innerHTML = '<option value="">همه درس‌ها</option>';
+
+  state.subjects.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id; opt.textContent = s.name;
+    subjectSelect.appendChild(opt);
+
+    const opt2 = document.createElement('option');
+    opt2.value = s.id; opt2.textContent = s.name;
+    filterSubject.appendChild(opt2);
+  });
+
+  const badges = $('#subjectsBadges');
+  badges.innerHTML = '';
+  state.subjects.forEach(s => {
+    const span = document.createElement('span');
+    span.className='badge dot';
+    span.innerHTML = '<span class="dot" style="background:'+s.color+'"></span>'+s.name;
+    badges.appendChild(span);
+  });
+}
+renderSubjects();
+
+$('#addSubjectBtn').addEventListener('click', () => {
+  const name = $('#subjectName').value.trim();
+  const color = $('#subjectColor').value || '#4e9eff';
+  if(!name){ alert('نام درس را بنویس.'); return; }
+  state.subjects.push({id:uid(), name, color});
+  saveData(state);
+  $('#subjectName').value='';
+  renderSubjects();
+});
+
+// --- Tasks
+function renderKPIs(tasks){
+  const open = tasks.filter(t=>!t.completed).length;
+  const done = tasks.filter(t=>t.completed).length;
+  $('#kpiOpen').textContent = open;
+  $('#kpiDone').textContent = done;
+  const upcoming = tasks.filter(t=>!t.completed && t.due).sort((a,b)=> new Date(a.due) - new Date(b.due))[0];
+  $('#kpiNext').textContent = upcoming ? toPersianDateTime(upcoming.due) : '—';
+}
+
+function toPersianDateTime(dt){
+  const d = new Date(dt);
+  if (isNaN(d)) return '—';
+  try{
+    const date = d.toLocaleDateString('fa-IR', {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+    const time = d.toLocaleTimeString('fa-IR', {hour:'2-digit', minute:'2-digit'});
+    return date + '، ' + time;
+  }catch(e){ return d.toISOString() }
+}
+
+function priorityBadge(p){
+  if(p==='high') return '<span class="badge" style="background:rgba(255,107,107,.15); border-color: rgba(255,107,107,.35); color:#ffd0d0">اولویت بالا</span>';
+  if(p==='low') return '<span class="badge" style="background:rgba(122,255,200,.12); border-color: rgba(122,255,200,.35); color:#d7ffef">کم</span>';
+  return '<span class="badge">معمولی</span>';
+}
+
+function applyFilters(tasks){
+  const q = $('#searchBox').value.trim().toLowerCase();
+  const subj = $('#filterSubject').value;
+  const status = $('#filterStatus').value;
+  let out = tasks.slice();
+
+  if(q){
+    out = out.filter(t => (t.title + ' ' + (t.notes||'') + ' ' + (t.members||'')).toLowerCase().includes(q));
+  }
+  if(subj){ out = out.filter(t => t.subjectId === subj); }
+  if(status){
+    const now = Date.now();
+    if(status==='open') out = out.filter(t => !t.completed);
+    if(status==='done') out = out.filter(t => t.completed);
+    if(status==='overdue') out = out.filter(t => !t.completed && t.due && new Date(t.due).getTime() < now);
+  }
+  const sortBy = $('#sortBy').value;
+  if(sortBy==='dueAsc') out.sort((a,b)=> (new Date(a.due||'2100-01-01') - new Date(b.due||'2100-01-01')));
+  if(sortBy==='dueDesc') out.sort((a,b)=> (new Date(b.due||'1970-01-01') - new Date(a.due||'1970-01-01')));
+  if(sortBy==='prio'){
+    const rank = {high:0, normal:1, low:2};
+    out.sort((a,b)=> (rank[a.priority||'normal'] - rank[b.priority||'normal']) || (new Date(a.due||'2100-01-01') - new Date(b.due||'2100-01-01')));
+  }
+  if(sortBy==='created') out.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+
+  return out;
+}
+
+function subjectById(id){ return state.subjects.find(s=>s.id===id) }
+
+function renderTasks(){
+  const container = $('#tasksList');
+  const tasks = applyFilters(state.tasks);
+  renderKPIs(state.tasks);
+  container.innerHTML='';
+  if(tasks.length===0){ $('#emptyState').style.display='block'; return; }
+  $('#emptyState').style.display='none';
+
+  tasks.forEach(t => {
+    const s = subjectById(t.subjectId);
+    const due = t.due ? new Date(t.due) : null;
+    const overdue = !t.completed && due && (due.getTime() < Date.now());
+    const div = document.createElement('div');
+    div.className='task' + (overdue ? ' overdue' : '');
+
+    const left = document.createElement('div');
+    left.className='left';
+    const title = document.createElement('div');
+    title.className='title';
+    title.textContent = t.title;
+    left.appendChild(title);
+
+    const meta = document.createElement('div');
+    meta.className='meta';
+    if(s){
+      const sb = document.createElement('span');
+      sb.className='badge dot';
+      sb.innerHTML = '<span class="dot" style="background:'+s.color+'"></span>'+s.name;
+      meta.appendChild(sb);
+    }
+    if(t.due){
+      const db = document.createElement('span');
+      db.className='badge'; db.textContent = 'موعد: ' + toPersianDateTime(t.due);
+      meta.appendChild(db);
+    }
+    const pb = document.createElement('span');
+    pb.innerHTML = priorityBadge(t.priority||'normal');
+    meta.appendChild(pb);
+
+    if(t.members){
+      const mb = document.createElement('span');
+      mb.className='badge'; mb.textContent = 'اعضا: ' + t.members;
+      meta.appendChild(mb);
+    }
+    if(t.remindMinutes){
+      const rb = document.createElement('span');
+      rb.className='badge'; rb.textContent = 'یادآوری: ' + t.remindMinutes + 'دقیقه قبل';
+      meta.appendChild(rb);
+    }
+    left.appendChild(meta);
+
+    if(t.notes){
+      const p = document.createElement('div');
+      p.className='muted small';
+      p.textContent = t.notes;
+      p.style.marginTop='6px';
+      left.appendChild(p);
+    }
+
+    const right = document.createElement('div');
+    right.className='right';
+    const doneBtn = document.createElement('button');
+    doneBtn.className='btn ' + (t.completed ? 'btn-ok' : 'btn-ghost');
+    doneBtn.textContent = t.completed ? 'برگردان به باز' : 'انجام شد';
+    doneBtn.addEventListener('click', ()=>{
+      t.completed = !t.completed;
+      saveData(state);
+      renderTasks();
+    });
+    right.appendChild(doneBtn);
+
+    const editBtn = document.createElement('button');
+    editBtn.className='btn btn-ghost';
+    editBtn.textContent = 'ویرایش';
+    editBtn.addEventListener('click', ()=> editTask(t.id));
+    right.appendChild(editBtn);
+
+    const delBtn = document.createElement('button');
+    delBtn.className='btn btn-danger';
+    delBtn.textContent = 'حذف';
+    delBtn.addEventListener('click', ()=>{
+      if(confirm('این تکلیف حذف شود؟')){
+        state.tasks = state.tasks.filter(x=>x.id!==t.id);
+        saveData(state);
+        renderTasks();
+      }
+    });
+    right.appendChild(delBtn);
+
+    div.appendChild(left);
+    div.appendChild(right);
+    container.appendChild(div);
+  });
+}
+renderTasks();
+
+function editTask(id){
+  const t = state.tasks.find(x=>x.id===id);
+  if(!t) return;
+  $('#taskTitle').value = t.title;
+  $('#taskSubject').value = t.subjectId || '';
+  $('#taskDue').value = t.due ? new Date(t.due).toISOString().slice(0,16) : '';
+  $('#taskRemind').value = t.remindMinutes || '';
+  $('#taskPriority').value = t.priority || 'normal';
+  $('#taskMembers').value = t.members || '';
+  $('#taskNotes').value = t.notes || '';
+  // Overwrite by saving with same id
+  $('#addTaskBtn').textContent = 'ذخیره تغییرات';
+  $('#addTaskBtn').dataset.editId = id;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+$('#addTaskBtn').addEventListener('click', () => {
+  const title = $('#taskTitle').value.trim();
+  const subjectId = $('#taskSubject').value || '';
+  const due = $('#taskDue').value ? new Date($('#taskDue').value) : null;
+  const remindMinutes = parseInt($('#taskRemind').value || '0', 10) || 0;
+  const priority = $('#taskPriority').value || 'normal';
+  const members = $('#taskMembers').value.trim();
+  const notes = $('#taskNotes').value.trim();
+
+  if(!title){ alert('عنوان تکلیف را بنویس.'); return; }
+
+  const editId = $('#addTaskBtn').dataset.editId;
+  if(editId){
+    const t = state.tasks.find(x=>x.id===editId);
+    if(t){
+      t.title=title; t.subjectId=subjectId; t.due= due? due.toISOString():'';
+      t.remindMinutes=remindMinutes; t.priority=priority; t.members=members; t.notes=notes;
+    }
+    $('#addTaskBtn').textContent='ثبت تکلیف';
+    delete $('#addTaskBtn').dataset.editId;
+  }else{
+    state.tasks.push({
+      id: uid(),
+      title, subjectId,
+      due: due? due.toISOString(): '',
+      remindMinutes, priority, members, notes,
+      completed:false,
+      createdAt:new Date().toISOString()
+    });
+  }
+
+  saveData(state);
+  clearTaskForm();
+  renderTasks();
+});
+
+function clearTaskForm(){
+  $('#taskTitle').value='';
+  $('#taskSubject').value = state.subjects[0]?.id || '';
+  $('#taskDue').value='';
+  $('#taskRemind').value='';
+  $('#taskPriority').value='normal';
+  $('#taskMembers').value='';
+  $('#taskNotes').value='';
+}
+
+['#searchBox','#filterSubject','#filterStatus','#sortBy'].forEach(sel => {
+  $(sel).addEventListener('input', renderTasks);
+  $(sel).addEventListener('change', renderTasks);
+});
+
+// --- Notifications
+$('#requestNotifyBtn').addEventListener('click', async () => {
+  if(!('Notification' in window)){ alert('مرورگر شما از اعلان پشتیبانی نمی‌کند.'); return; }
+  const perm = await Notification.requestPermission();
+  if(perm!=='granted'){ alert('برای اعلان‌ها باید اجازه بدهی.'); return; }
+  new Notification('مشق‌یار فعال شد ✅', { body:'از این پس نزدیک موعد، اعلان می‌گیری (تا زمانی که صفحه باز باشد).' });
+});
+
+function loadNotifiedSet(){
+  try{
+    const raw = localStorage.getItem(notifiedKey);
+    if(!raw) return new Set();
+    return new Set(JSON.parse(raw));
+  }catch{ return new Set() }
+}
+function saveNotifiedSet(set){
+  localStorage.setItem(notifiedKey, JSON.stringify(Array.from(set)));
+}
+let notified = loadNotifiedSet();
+
+function checkReminders(){
+  if(!('Notification' in window) || Notification.permission!=='granted') return;
+  const now = Date.now();
+  state.tasks.forEach(t => {
+    if(t.completed || !t.due || !t.remindMinutes) return;
+    const dueTs = new Date(t.due).getTime();
+    const triggerTs = dueTs - t.remindMinutes*60*1000;
+    if(now >= triggerTs && now <= dueTs && !notified.has(t.id)){
+      const subject = subjectById(t.subjectId);
+      const body = (subject? ('درس '+subject.name+' — ') : '') + 'زمان تحویل: ' + toPersianDateTime(t.due);
+      new Notification('یادآوری تکلیف: ' + t.title, { body });
+      notified.add(t.id);
+      saveNotifiedSet(notified);
+    }
+  });
+}
+setInterval(checkReminders, 60*1000); // هر دقیقه
+document.addEventListener('visibilitychange', () => { if(!document.hidden) checkReminders(); });
+
+// --- Export / Import JSON
+$('#exportJsonBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'mashqyar_data.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+$('#importJsonBtn').addEventListener('click', ()=> $('#importFile').click());
+$('#importFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data || !Array.isArray(data.subjects) || !Array.isArray(data.tasks)) throw new Error('فرمت نامعتبر');
+      state = data;
+      saveData(state);
+      renderSubjects(); renderTasks();
+      alert('داده‌ها با موفقیت وارد شد ✅');
+    }catch(err){
+      alert('خطا در ورودی JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// --- Export ICS
+function formatICSDate(dt){
+  const d = new Date(dt);
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth()+1).padStart(2,'0');
+  const day = String(d.getUTCDate()).padStart(2,'0');
+  const h = String(d.getUTCHours()).padStart(2,'0');
+  const min = String(d.getUTCMinutes()).padStart(2,'0');
+  const s = String(d.getUTCSeconds()).padStart(2,'0');
+  return `${y}${m}${day}T${h}${min}${s}Z`;
+}
+$('#exportIcsBtn').addEventListener('click', () => {
+  const lines = [];
+  lines.push('BEGIN:VCALENDAR');
+  lines.push('VERSION:2.0');
+  lines.push('PRODID:-//MashqYar//fa-IR//');
+  const now = formatICSDate(new Date());
+  state.tasks.filter(t=>!t.completed && t.due).forEach(t => {
+    const uid = t.id + '@mashqyar';
+    const summary = 'تکلیف: ' + t.title;
+    const desc = (t.notes || '') + (t.members ? (' | اعضا: '+t.members) : '');
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:' + uid);
+    lines.push('DTSTAMP:' + now);
+    lines.push('DTSTART:' + formatICSDate(t.due));
+    lines.push('SUMMARY:' + summary.replace(/\r?\n/g, ' '));
+    if(desc) lines.push('DESCRIPTION:' + desc.replace(/\r?\n/g, ' '));
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  const blob = new Blob([lines.join('\r\n')], {type:'text/calendar'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'mashqyar_tasks.ics'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+// --- Clear All
+$('#clearBtn').addEventListener('click', ()=>{
+  if(confirm('کل داده‌های محلی حذف شود؟')){
+    localStorage.removeItem(storeKey);
+    localStorage.removeItem(notifiedKey);
+    state = {subjects:[], tasks:[]};
+    renderSubjects(); renderTasks();
+  }
+});
+
+// Seed example on first run
+if(state.subjects.length===0 && state.tasks.length===0){
+  state.subjects = [
+    {id: uid(), name:'ریاضی', color:'#4e9eff'},
+    {id: uid(), name:'علوم', color:'#6ae6b9'},
+    {id: uid(), name:'ادبیات', color:'#ffb84d'}
+  ];
+  state.tasks = [
+    {id: uid(), title:'حل تمرین ۱ تا ۱۰', subjectId: state.subjects[0].id, due:new Date(Date.now()+36e5*24).toISOString(), remindMinutes:120, priority:'high', members:'', notes:'دفتر حل لازم است', completed:false, createdAt:new Date().toISOString()},
+    {id: uid(), title:'خلاصه‌نویسی فصل گیاهان', subjectId: state.subjects[1].id, due:new Date(Date.now()+36e5*48).toISOString(), remindMinutes:60, priority:'normal', members:'علی، زهرا', notes:'با تصاویر', completed:false, createdAt:new Date().toISOString()}
+  ];
+  saveData(state);
+  renderSubjects(); renderTasks();
+}
+</script>
+</body>
+</html>
