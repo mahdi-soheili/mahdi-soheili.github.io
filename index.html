@@ -1700,46 +1700,59 @@
   </script>
 
   <!-- ====== Deadline toggle + Persian datepicker ====== -->
-  <script>
   (function(){
-    const $date = $('#deadline-date');
-    const $time = $('#deadline-time');
-    const $box  = $('#deadline-fields');
-    const $chk  = $('#deadline-enabled');
-    
-    // Initialize Persian datepicker
-    if ($date) {
-      $($date).persianDatepicker({
-        initialValue: false,
-        format: 'YYYY/MM/DD',
-        autoClose: true,
-        calendar: { persian: { locale: 'fa' } }
-      });
-    }
-    
-    function toggleDeadlineUI(){
-      if ($chk.checked) {
-        $box.style.display = 'grid';
-      } else {
-        $box.style.display = 'none';
+  const $date = $('#deadline-date');
+  const $time = $('#deadline-time');
+  const $box  = $('#deadline-fields');
+  const $chk  = $('#deadline-enabled');
+  
+  // Initialize Persian datepicker
+  if ($date.length) {
+    $($date).persianDatepicker({
+      initialValue: false,
+      format: 'YYYY/MM/DD',
+      autoClose: true,
+      calendar: {
+        persian: {
+          locale: 'fa'
+        }
+      },
+      observer: true,
+      toolbox: {
+        calendarSwitch: {
+          enabled: false
+        }
       }
+    });
+  }
+  
+  function toggleDeadlineUI(){
+    if ($chk.is(':checked')) {
+      $box.show();
+    } else {
+      $box.hide();
     }
-    
-    $chk.addEventListener('change', toggleDeadlineUI);
-    toggleDeadlineUI();
-    
-    // helper: تبدیل تاریخ شمسی + ساعت به timestamp میلادی
-    window.__mashqyar__toTs = function(persianDateStr, timeStr){
-      if (!persianDateStr) return null;
-      try{
-        const pd = new persianDate().parse(persianDateStr).toDate(); // میلادی
-        const [hh='00', mm='00'] = (timeStr||'00:00').split(':');
-        pd.setHours(+hh, +mm, 0, 0);
-        return pd.getTime();
-      }catch(e){ return null; }
-    };
-  })();
-  </script>
+  }
+  
+  $chk.on('change', toggleDeadlineUI);
+  toggleDeadlineUI();
+  
+  // helper: تبدیل تاریخ شمسی + ساعت به timestamp میلادی
+  window.__mashqyar__toTs = function(persianDateStr, timeStr){
+    if (!persianDateStr) return null;
+    try{
+      // استفاده از persianDate برای تبدیل تاریخ شمسی به میلادی
+      const pd = new persianDate(persianDateStr, 'YYYY/MM/DD').toCalendar('gregorian');
+      const gDate = pd.toDate();
+      const [hh='00', mm='00'] = (timeStr||'00:00').split(':');
+      gDate.setHours(+hh, +mm, 0, 0);
+      return gDate.getTime();
+    }catch(e){ 
+      console.error('Error converting date:', e);
+      return null; 
+    }
+  };
+})();
 
   <!-- ====== Export PNG with html2canvas ====== -->
   <script>
