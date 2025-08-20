@@ -10,7 +10,6 @@
     
     <!-- CSS Persian Datepicker -->
     <link href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css" rel="stylesheet">
-
     <style>
         :root {
             --primary: #4361ee;
@@ -32,14 +31,12 @@
             --radius: 16px;
             --transition: all 0.3s ease;
         }
-
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: 'Vazirmatn', sans-serif;
         }
-
         body {
             background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
             color: var(--text-light);
@@ -47,12 +44,14 @@
             transition: var(--transition);
             padding: 20px;
         }
-
+        body.light-theme {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            color: var(--text-dark);
+        }
         .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-
         header {
             padding: 20px 0;
             position: sticky;
@@ -63,7 +62,10 @@
             border-bottom: 1px solid var(--dark-border);
             transition: var(--transition);
         }
-
+        body.light-theme header {
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid var(--light-border);
+        }
         .header-content {
             display: flex;
             justify-content: space-between;
@@ -71,13 +73,11 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-
         .logo {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-
         .logo-icon {
             width: 40px;
             height: 40px;
@@ -91,25 +91,21 @@
             color: white;
             box-shadow: 0 4px 10px rgba(67, 97, 238, 0.4);
         }
-
         .logo h1 {
             font-size: 24px;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
-
         .tagline {
             font-size: 14px;
             opacity: 0.8;
             margin-top: 4px;
         }
-
         .header-actions {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
-
         .theme-toggle {
             width: 50px;
             height: 50px;
@@ -124,11 +120,13 @@
             justify-content: center;
             transition: var(--transition);
         }
-
+        body.light-theme .theme-toggle {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-dark);
+        }
         .theme-toggle:hover {
             transform: scale(1.05);
         }
-
         .btn {
             padding: 10px 16px;
             border-radius: 10px;
@@ -142,44 +140,40 @@
             justify-content: center;
             gap: 6px;
         }
-
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
         }
-
         .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
             color: var(--text-light);
         }
-
+        body.light-theme .btn-secondary {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-dark);
+        }
         .btn-danger {
             background: linear-gradient(135deg, var(--danger), #ff6b6b);
             color: white;
         }
-
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-
         main {
             padding: 30px 0;
         }
-
         .dashboard {
             display: grid;
             grid-template-columns: 1fr 2fr;
             gap: 24px;
             margin-bottom: 30px;
         }
-
         @media (max-width: 900px) {
             .dashboard {
                 grid-template-columns: 1fr;
             }
         }
-
         .card {
             background: var(--dark-card);
             border-radius: var(--radius);
@@ -187,7 +181,9 @@
             overflow: hidden;
             transition: var(--transition);
         }
-
+        body.light-theme .card {
+            background: var(--light-card);
+        }
         .card-header {
             padding: 20px;
             border-bottom: 1px solid var(--dark-border);
@@ -195,7 +191,9 @@
             justify-content: space-between;
             align-items: center;
         }
-
+        body.light-theme .card-header {
+            border-bottom: 1px solid var(--light-border);
+        }
         .card-title {
             font-size: 18px;
             font-weight: 700;
@@ -203,7 +201,6 @@
             align-items: center;
             gap: 8px;
         }
-
         .card-icon {
             width: 30px;
             height: 30px;
@@ -214,22 +211,21 @@
             justify-content: center;
             font-size: 16px;
         }
-
+        body.light-theme .card-icon {
+            background: rgba(0, 0, 0, 0.05);
+        }
         .card-body {
             padding: 20px;
         }
-
         .form-group {
             margin-bottom: 20px;
         }
-
         .form-label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
             font-size: 14px;
         }
-
         .form-control {
             width: 100%;
             padding: 12px 16px;
@@ -240,32 +236,32 @@
             font-size: 15px;
             transition: var(--transition);
         }
-
+        body.light-theme .form-control {
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--text-dark);
+            border: 1px solid var(--light-border);
+        }
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
         }
-
         .form-row-3 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 15px;
         }
-
         @media (max-width: 768px) {
             .form-row-3 {
                 grid-template-columns: 1fr;
             }
         }
-
         .subjects-badges {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-top: 15px;
         }
-
         .subject-badge {
             display: flex;
             align-items: center;
@@ -276,7 +272,14 @@
             font-size: 14px;
             position: relative;
         }
-
+        body.light-theme .subject-badge {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .subject-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
         .remove-subject {
             background: none;
             border: none;
@@ -286,32 +289,30 @@
             margin-right: 5px;
             padding: 0 5px;
         }
-
         .stats-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-top: 20px;
         }
-
         .stat-card {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             padding: 15px;
             text-align: center;
         }
-
+        body.light-theme .stat-card {
+            background: rgba(0, 0, 0, 0.03);
+        }
         .stat-value {
             font-size: 24px;
             font-weight: 700;
             margin: 5px 0;
         }
-
         .stat-label {
             font-size: 13px;
             opacity: 0.8;
         }
-
         .tasks-header {
             display: flex;
             justify-content: space-between;
@@ -320,13 +321,11 @@
             gap: 15px;
             margin-bottom: 20px;
         }
-
         .search-box {
             position: relative;
             flex: 1;
             min-width: 200px;
         }
-
         .search-box input {
             width: 100%;
             padding: 10px 16px 10px 45px;
@@ -336,7 +335,11 @@
             color: var(--text-light);
             font-size: 14px;
         }
-
+        body.light-theme .search-box input {
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--text-dark);
+            border: 1px solid var(--light-border);
+        }
         .search-icon {
             position: absolute;
             right: 15px;
@@ -344,13 +347,11 @@
             transform: translateY(-50%);
             opacity: 0.6;
         }
-
         .filters {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
-
         .filter-select {
             padding: 8px 12px;
             border-radius: 8px;
@@ -360,13 +361,16 @@
             font-size: 14px;
             cursor: pointer;
         }
-
+        body.light-theme .filter-select {
+            background: rgba(0, 0, 0, 0.02);
+            color: var(--text-dark);
+            border: 1px solid var(--light-border);
+        }
         .tasks-list {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-
         .task-item {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
@@ -377,29 +381,27 @@
             align-items: center;
             transition: var(--transition);
         }
-
+        body.light-theme .task-item {
+            background: rgba(0, 0, 0, 0.02);
+        }
         .task-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-
         .task-item.overdue {
             border-right: 3px solid var(--danger);
         }
-
         .task-content h3 {
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 8px;
         }
-
         .task-meta {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             margin-bottom: 10px;
         }
-
         .task-badge {
             display: inline-flex;
             align-items: center;
@@ -409,28 +411,26 @@
             font-size: 12px;
             background: rgba(255, 255, 255, 0.1);
         }
-
+        body.light-theme .task-badge {
+            background: rgba(0, 0, 0, 0.05);
+        }
         .priority-high {
             background: rgba(239, 71, 111, 0.2);
             color: #ff8fab;
         }
-
         .priority-low {
             background: rgba(76, 201, 240, 0.2);
             color: #a5d8ff;
         }
-
         .task-description {
             font-size: 14px;
             opacity: 0.8;
             line-height: 1.5;
         }
-
         .task-actions {
             display: flex;
             gap: 8px;
         }
-
         .task-btn {
             width: 36px;
             height: 36px;
@@ -444,26 +444,25 @@
             justify-content: center;
             transition: var(--transition);
         }
-
+        body.light-theme .task-btn {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-dark);
+        }
         .task-btn:hover {
             background: var(--primary);
         }
-
         .task-btn.complete {
             background: rgba(76, 201, 240, 0.2);
         }
-
         .empty-state {
             text-align: center;
             padding: 40px 20px;
             opacity: 0.7;
         }
-
         .empty-icon {
             font-size: 48px;
             margin-bottom: 15px;
         }
-
         .footer {
             text-align: center;
             padding: 20px;
@@ -471,7 +470,6 @@
             opacity: 0.7;
             margin-top: 30px;
         }
-
         .notification {
             position: fixed;
             bottom: 20px;
@@ -490,16 +488,17 @@
             transition: var(--transition);
             max-width: 300px;
         }
-
+        body.light-theme .notification {
+            background: var(--light-card);
+            color: var(--text-dark);
+        }
         .notification.show {
             transform: translateY(0);
             opacity: 1;
         }
-
         .notification-icon {
             font-size: 20px;
         }
-
         .notification-close {
             margin-right: auto;
             background: none;
@@ -508,50 +507,45 @@
             cursor: pointer;
             font-size: 16px;
         }
-
         .deadline-section {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 20px;
         }
-
+        body.light-theme .deadline-section {
+            background: rgba(0, 0, 0, 0.03);
+        }
         .deadline-header {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 15px;
         }
-
         .deadline-toggle {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-
         .deadline-fields {
             display: none;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-
         .deadline-fields.show {
             display: grid;
         }
-
         .toggle-switch {
             position: relative;
             display: inline-block;
             width: 50px;
             height: 24px;
         }
-
         .toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-
         .toggle-slider {
             position: absolute;
             cursor: pointer;
@@ -563,7 +557,6 @@
             transition: .4s;
             border-radius: 24px;
         }
-
         .toggle-slider:before {
             position: absolute;
             content: "";
@@ -575,21 +568,20 @@
             transition: .4s;
             border-radius: 50%;
         }
-
         input:checked + .toggle-slider {
             background-color: var(--primary);
         }
-
         input:checked + .toggle-slider:before {
             transform: translateX(26px);
         }
-
         .optional-section {
             margin-top: 15px;
             padding-top: 15px;
             border-top: 1px dashed var(--dark-border);
         }
-
+        body.light-theme .optional-section {
+            border-top: 1px dashed var(--light-border);
+        }
         .optional-toggle {
             display: flex;
             align-items: center;
@@ -598,15 +590,12 @@
             cursor: pointer;
             font-weight: 500;
         }
-
         .optional-content {
             display: none;
         }
-
         .optional-content.show {
             display: block;
         }
-
         /* مودال برای افزودن درس جدید */
         .modal {
             display: none;
@@ -618,7 +607,6 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
         }
-
         .modal-content {
             background-color: var(--dark-card);
             margin: 10% auto;
@@ -628,7 +616,9 @@
             max-width: 500px;
             box-shadow: var(--shadow);
         }
-
+        body.light-theme .modal-content {
+            background-color: var(--light-card);
+        }
         .close-modal {
             color: #aaa;
             float: left;
@@ -636,17 +626,14 @@
             font-weight: bold;
             cursor: pointer;
         }
-
         .close-modal:hover {
             color: var(--danger);
         }
-
         .color-picker {
             display: flex;
             gap: 10px;
             margin: 10px 0;
         }
-
         .color-option {
             width: 30px;
             height: 30px;
@@ -654,11 +641,9 @@
             cursor: pointer;
             border: 2px solid transparent;
         }
-
         .color-option.selected {
             border-color: white;
         }
-
         .add-subject-btn {
             margin-top: 15px;
             display: flex;
@@ -668,17 +653,28 @@
             cursor: pointer;
             font-size: 14px;
         }
-
+        body.light-theme .add-subject-btn {
+            color: var(--primary);
+        }
         /* رفع مشکل رنگ زمینه dropdownها */
         select.form-control, select.filter-select {
             background-color: rgba(255, 255, 255, 0.05) !important;
             color: var(--text-light) !important;
         }
-
+        body.light-theme select.form-control, 
+        body.light-theme select.filter-select {
+            background-color: rgba(0, 0, 0, 0.02) !important;
+            color: var(--text-dark) !important;
+        }
         select.form-control option, 
         select.filter-select option {
             background-color: var(--dark-card);
             color: var(--text-light);
+        }
+        body.light-theme select.form-control option,
+        body.light-theme select.filter-select option {
+            background-color: var(--light-card);
+            color: var(--text-dark);
         }
     </style>
 </head>
@@ -701,7 +697,6 @@
             </div>
         </div>
     </header>
-
     <main class="container">
         <div class="dashboard">
             <!-- Left Column: Forms -->
@@ -718,26 +713,18 @@
                             <label class="form-label">عنوان تکلیف</label>
                             <input type="text" id="title" class="form-control" placeholder="مثلاً حل تمرین فصل ۲" required>
                         </div>
-
                         <div class="form-group">
                             <label class="form-label">درس</label>
                             <div class="subject-selector">
                                 <select id="subject" name="subject" required class="form-control">
                                     <option value="" disabled selected>یک درس را انتخاب کن…</option>
-                                    <option value="ریاضی">ریاضی</option>
-                                    <option value="علوم">علوم</option>
-                                    <option value="ادبیات">ادبیات</option>
-                                    <option value="دینی">دینی</option>
-                                    <option value="زبان">زبان انگلیسی</option>
                                 </select>
                                 <div class="add-subject-btn" id="openSubjectModal">
                                     <span>+</span> افزودن درس جدید
                                 </div>
                             </div>
                         </div>
-
                         <div id="subjectsBadges" class="subjects-badges"></div>
-
                         <div class="deadline-section">
                             <div class="deadline-header">
                                 <label class="form-label">مهلت تحویل</label>
@@ -760,7 +747,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="form-row-3">
                             <div class="form-group">
                                 <label class="form-label">اولویت</label>
@@ -782,7 +768,6 @@
                                 <input type="text" id="taskMembers" class="form-control" placeholder="مثلاً: علی، سارا">
                             </div>
                         </div>
-
                         <details id="optional-box">
                             <summary>گزینه‌های اختیاری</summary>
                             <div class="form-group">
@@ -794,12 +779,10 @@
                                 <textarea id="notes" rows="3" class="form-control"></textarea>
                             </div>
                         </details>
-
                         <div class="form-group">
                             <button type="submit" id="addTaskBtn" class="btn btn-primary" style="width: 100%;">ثبت تکلیف</button>
                         </div>
                     </form>
-
                     <div class="stats-container">
                         <div class="stat-card">
                             <div class="stat-label">تکالیف باز</div>
@@ -816,7 +799,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- Right Column: Tasks List -->
             <div class="card" id="board">
                 <div class="card-header">
@@ -834,11 +816,6 @@
                         <div class="filters">
                             <select id="filterSubject" class="filter-select">
                                 <option value="">همه درس‌ها</option>
-                                <option value="ریاضی">ریاضی</option>
-                                <option value="علوم">علوم</option>
-                                <option value="ادبیات">ادبیات</option>
-                                <option value="دینی">دینی</option>
-                                <option value="زبان">زبان انگلیسی</option>
                             </select>
                             <select id="filterStatus" class="filter-select">
                                 <option value="">همه وضعیت‌ها</option>
@@ -854,7 +831,6 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="tasks-list" id="tasksList"></div>
                     <div class="empty-state" id="emptyState" style="display:none">
                         <div class="empty-icon">📭</div>
@@ -864,12 +840,10 @@
                 </div>
             </div>
         </div>
-
         <div class="footer">
             ساخته‌شده با ❤️ برای دانش‌آموزان — نسخهٔ آزمایشی محلی (داده‌ها در مرورگر شما ذخیره می‌شود)
         </div>
     </main>
-
     <!-- مودال برای افزودن درس جدید -->
     <div id="subjectModal" class="modal">
         <div class="modal-content">
@@ -893,19 +867,16 @@
             <button id="addNewSubject" class="btn btn-primary">افزودن درس</button>
         </div>
     </div>
-
     <div class="notification" id="notification">
         <span class="notification-icon">✓</span>
         <span class="notification-message">پیام با موفقیت ثبت شد</span>
         <button class="notification-close">×</button>
     </div>
-
     <!-- اسکریپت‌های مورد نیاز -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
     <script>
         $(document).ready(function() {
             // --- Persian Datepicker Initialization ---
@@ -925,9 +896,9 @@
             // Toggle deadline fields
             $("#deadline-enabled").change(function() {
                 if ($(this).is(':checked')) {
-                    $("#deadline-fields").show();
+                    $("#deadline-fields").addClass("show");
                 } else {
-                    $("#deadline-fields").hide();
+                    $("#deadline-fields").removeClass("show");
                 }
             }).trigger('change');
             
@@ -986,6 +957,125 @@
             
             let state = loadData();
             
+            // --- Subject Management ---
+            const subjectSelect = $("#subject");
+            const subjectsBadges = $("#subjectsBadges");
+            const filterSubject = $("#filterSubject");
+            
+            function populateSubjectSelect() {
+                subjectSelect.html('<option value="" disabled selected>یک درس را انتخاب کن…</option>');
+                filterSubject.html('<option value="">همه درس‌ها</option>');
+                
+                state.subjects.forEach(s => {
+                    // Add to subject select
+                    const option = $("<option></option>")
+                        .attr("value", s.id)
+                        .text(s.name)
+                        .attr("data-color", s.color);
+                    subjectSelect.append(option);
+                    
+                    // Add to filter select
+                    const filterOption = $("<option></option>")
+                        .attr("value", s.id)
+                        .text(s.name);
+                    filterSubject.append(filterOption);
+                });
+            }
+            
+            function renderSubjectsBadges() {
+                subjectsBadges.empty();
+                state.subjects.forEach(s => {
+                    const badge = $("<span></span>")
+                        .addClass("subject-badge")
+                        .html(`
+                            <span class="subject-color" style="background:${s.color}"></span>
+                            ${s.name}
+                            <button class="remove-subject" data-id="${s.id}">×</button>
+                        `);
+                    subjectsBadges.append(badge);
+                });
+                
+                // Add event listeners to remove buttons
+                $(".remove-subject").on("click", function() {
+                    const id = $(this).data("id");
+                    if (confirm('آیا مطمئن هستید که می‌خواهید این درس را حذف کنید؟')) {
+                        // Check if any task uses this subject
+                        const tasksUsingSubject = state.tasks.filter(t => t.subjectId === id);
+                        if (tasksUsingSubject.length > 0) {
+                            showNotification('این درس در برخی تکالیف استفاده شده و نمی‌توان آن را حذف کرد', 3000);
+                            return;
+                        }
+                        
+                        state.subjects = state.subjects.filter(s => s.id !== id);
+                        saveData(state);
+                        populateSubjectSelect();
+                        renderSubjectsBadges();
+                        showNotification('درس با موفقیت حذف شد', 2000);
+                    }
+                });
+            }
+            
+            // --- Modal for adding new subjects
+            const modal = $("#subjectModal");
+            const openModalBtn = $("#openSubjectModal");
+            const closeModalBtn = $(".close-modal");
+            const addNewSubjectBtn = $("#addNewSubject");
+            const newSubjectName = $("#newSubjectName");
+            let selectedColor = '#4361ee';
+            
+            openModalBtn.on("click", () => {
+                modal.show();
+            });
+            
+            closeModalBtn.on("click", () => {
+                modal.hide();
+            });
+            
+            $(window).on("click", (e) => {
+                if ($(e.target).is(modal)) {
+                    modal.hide();
+                }
+            });
+            
+            // Color selection
+            $(".color-option").on("click", function() {
+                $(".color-option").removeClass("selected");
+                $(this).addClass("selected");
+                selectedColor = $(this).data("color");
+            });
+            
+            addNewSubjectBtn.on("click", () => {
+                const name = newSubjectName.val().trim();
+                if (!name) {
+                    showNotification('لطفاً نام درس را وارد کنید', 2000);
+                    return;
+                }
+                
+                // Check if subject already exists
+                if (state.subjects.some(s => s.name === name)) {
+                    showNotification('این درس قبلاً اضافه شده است', 2000);
+                    return;
+                }
+                
+                const newSubject = {
+                    id: uid(),
+                    name: name,
+                    color: selectedColor
+                };
+                
+                state.subjects.push(newSubject);
+                saveData(state);
+                populateSubjectSelect();
+                renderSubjectsBadges();
+                modal.hide();
+                newSubjectName.val('');
+                showNotification('درس جدید با موفقیت اضافه شد', 2000);
+            });
+            
+            // Initialize subjects
+            populateSubjectSelect();
+            renderSubjectsBadges();
+            
             // --- Tasks Management ---
             function renderKPIs(tasks) {
                 const open = tasks.filter(t => !t.completed).length;
@@ -1026,6 +1116,10 @@
                 return '<span class="task-badge">معمولی</span>';
             }
             
+            function subjectById(id) { 
+                return state.subjects.find(s => s.id === id) 
+            }
+            
             function applyFilters(tasks) {
                 const q = $("#searchBox").val().trim().toLowerCase();
                 const subj = $("#filterSubject").val();
@@ -1039,7 +1133,7 @@
                 }
                 
                 if (subj) { 
-                    out = out.filter(t => t.subject === subj); 
+                    out = out.filter(t => t.subjectId === subj); 
                 }
                 
                 if (status) {
@@ -1078,6 +1172,7 @@
                 $("#emptyState").hide();
                 
                 tasks.forEach(t => {
+                    const s = subjectById(t.subjectId);
                     const deadline = t.deadline ? new Date(t.deadline) : null;
                     const overdue = !t.completed && deadline && (deadline.getTime() < Date.now());
                     
@@ -1086,7 +1181,7 @@
                             <div class="task-content">
                                 <h3>${t.title}</h3>
                                 <div class="task-meta">
-                                    <span class="task-badge">${t.subject}</span>
+                                    ${s ? `<span class="task-badge"><span class="subject-color" style="background:${s.color}"></span>${s.name}</span>` : ''}
                                     ${t.deadline ? `<span class="task-badge">مهلت: ${formatPersianDateTime(t.deadline)}</span>` : ''}
                                     ${priorityBadge(t.priority || 'normal')}
                                     ${t.members ? `<span class="task-badge">اعضا: ${t.members}</span>` : ''}
@@ -1128,20 +1223,26 @@
                 if (!t) return;
                 
                 $("#title").val(t.title);
-                $("#subject").val(t.subject);
+                
+                const subject = subjectById(t.subjectId);
+                if (subject) {
+                    subjectSelect.val(subject.id);
+                }
                 
                 if (t.deadline) {
                     $("#deadline-enabled").prop("checked", true);
-                    $("#deadline-fields").show();
+                    $("#deadline-fields").addClass("show");
                     
                     const date = new persianDate(new Date(t.deadline));
                     $("#deadline-date").val(date.format('YYYY/MM/DD'));
                     
                     const time = new Date(t.deadline);
-                    $("#deadline-time").val(time.toTimeString().slice(0, 5));
+                    const hours = time.getHours().toString().padStart(2, '0');
+                    const minutes = time.getMinutes().toString().padStart(2, '0');
+                    $("#deadline-time").val(`${hours}:${minutes}`);
                 } else {
                     $("#deadline-enabled").prop("checked", false);
-                    $("#deadline-fields").hide();
+                    $("#deadline-fields").removeClass("show");
                 }
                 
                 $("#taskPriority").val(t.priority || 'normal');
@@ -1164,14 +1265,15 @@
                 e.preventDefault();
                 
                 const title = $("#title").val().trim();
-                const subject = $("#subject").val();
+                const subjectId = subjectSelect.val();
+                const subject = state.subjects.find(s => s.id === subjectId);
                 
                 if (!title) {
                     showNotification('عنوان تکلیف را وارد کنید', 2000);
                     return;
                 }
                 
-                if (!subject) {
+                if (!subjectId) {
                     showNotification('درس را انتخاب کنید', 2000);
                     return;
                 }
@@ -1205,7 +1307,7 @@
                     const t = state.tasks.find(x => x.id === editId);
                     if (t) {
                         t.title = title; 
-                        t.subject = subject; 
+                        t.subjectId = subjectId; 
                         t.deadline = deadline;
                         t.priority = priority; 
                         t.completed = status;
@@ -1219,7 +1321,7 @@
                     state.tasks.push({
                         id: uid(),
                         title, 
-                        subject,
+                        subjectId,
                         deadline,
                         priority, 
                         completed: status,
@@ -1233,7 +1335,7 @@
                 
                 saveData(state);
                 this.reset();
-                $("#deadline-fields").hide();
+                $("#deadline-fields").removeClass("show");
                 $("#deadline-enabled").prop("checked", false);
                 $("#optional-box").prop("open", false);
                 renderTasks();
@@ -1246,6 +1348,8 @@
                 if (confirm('کل داده‌های محلی حذف شود؟')) {
                     localStorage.removeItem(storeKey);
                     state = { subjects: [], tasks: [] };
+                    populateSubjectSelect();
+                    renderSubjectsBadges();
                     renderTasks();
                     showNotification('تمام داده‌ها حذف شد', 2000);
                 }
@@ -1271,6 +1375,53 @@
             
             // --- Initial Render ---
             renderTasks();
+            
+            // Seed example on first run
+            if (state.subjects.length === 0 && state.tasks.length === 0) {
+                state.subjects = [
+                    { id: uid(), name: 'ریاضی', color: '#4361ee' },
+                    { id: uid(), name: 'علوم تجربی', color: '#f72585' },
+                    { id: uid(), name: 'فارسی (ادبیات + نگارش)', color: '#3a0ca3' }
+                ];
+                
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                
+                const dayAfter = new Date();
+                dayAfter.setDate(dayAfter.getDate() + 2);
+                
+                state.tasks = [
+                    { 
+                        id: uid(), 
+                        title: 'حل تمرین ۱ تا ۱۰', 
+                        subjectId: state.subjects[0].id, 
+                        deadline: tomorrow.toISOString(), 
+                        remindMinutes: 120, 
+                        priority: 'high', 
+                        members: '', 
+                        notes: 'دفتر حل لازم است', 
+                        completed: false, 
+                        createdAt: new Date().toISOString() 
+                    },
+                    { 
+                        id: uid(), 
+                        title: 'خلاصه‌نویسی فصل گیاهان', 
+                        subjectId: state.subjects[1].id, 
+                        deadline: dayAfter.toISOString(), 
+                        remindMinutes: 60, 
+                        priority: 'normal', 
+                        members: 'علی، زهرا', 
+                        notes: 'با تصاویر', 
+                        completed: false, 
+                        createdAt: new Date().toISOString() 
+                    }
+                ];
+                
+                saveData(state);
+                populateSubjectSelect();
+                renderSubjectsBadges();
+                renderTasks();
+            }
         });
     </script>
 </body>
