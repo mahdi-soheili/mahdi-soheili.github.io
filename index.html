@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>مشق‌یار – یادآور تکالیف دانش‌آموزی</title>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.css" rel="stylesheet">
 <style>
   :root {
     --primary: #4361ee;
@@ -779,7 +779,20 @@
   .optional-content.show {
     display: block;
   }
+
+  /* مطمئن بشیم select قابل کلیکه و چیزی روش نیست */
+  select, select * { pointer-events: auto !important; }
+  label[for="subject"] { position: static !important; }
+  .select-cover, .input-cover { display: none !important; } /* اگر لایه شفاف داری */
+  
+  details#optional-box { display:block !important; }
 </style>
+<!-- Persian datepicker -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.js"></script>
+<!-- html2canvas برای خروجی PNG -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
   <header>
@@ -793,7 +806,7 @@
           </div>
         </div>
         <div class="header-actions">
-          <button id="exportPngBtn" class="btn btn-secondary">خروجی PNG</button>
+          <button id="btn-export" class="btn btn-secondary">خروجی PNG</button>
           <button id="clearBtn" class="btn btn-danger">حذف داده‌ها</button>
           <button id="themeToggle" class="theme-toggle">🌙</button>
         </div>
@@ -812,333 +825,155 @@
           </div>
         </div>
         <div class="card-body">
-          <div class="form-group">
-            <label class="form-label">عنوان تکلیف</label>
-            <input type="text" id="taskTitle" class="form-control" placeholder="مثلاً حل تمرین فصل ۲">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">درس</label>
-            <div class="subject-selector">
-              <input type="text" id="subjectSearch" class="subject-search" placeholder="جستجو یا انتخاب درس...">
-              <div id="subjectDropdown" class="subject-dropdown">
-                <div class="subject-category">🟢 ابتدایی (دبستان)</div>
-                <div class="subject-option" data-name="فارسی (خوانداری + نگارش)" data-color="#4361ee">
-                  <span class="subject-color" style="background:#4361ee"></span>
-                  <span>فارسی (خوانداری + نگارش)</span>
-                </div>
-                <div class="subject-option" data-name="ریاضی" data-color="#3a0ca3">
-                  <span class="subject-color" style="background:#3a0ca3"></span>
-                  <span>ریاضی</span>
-                </div>
-                <div class="subject-option" data-name="علوم تجربی" data-color="#f72585">
-                  <span class="subject-color" style="background:#f72585"></span>
-                  <span>علوم تجربی</span>
-                </div>
-                <div class="subject-option" data-name="مطالعات اجتماعی" data-color="#4cc9f0">
-                  <span class="subject-color" style="background:#4cc9f0"></span>
-                  <span>مطالعات اجتماعی</span>
-                </div>
-                <div class="subject-option" data-name="قرآن" data-color="#f8961e">
-                  <span class="subject-color" style="background:#f8961e"></span>
-                  <span>قرآن</span>
-                </div>
-                <div class="subject-option" data-name="هدیه‌های آسمان (دینی)" data-color="#f94144">
-                  <span class="subject-color" style="background:#f94144"></span>
-                  <span>هدیه‌های آسمان (دینی)</span>
-                </div>
-                <div class="subject-option" data-name="آموزش قرآن" data-color="#f3722c">
-                  <span class="subject-color" style="background:#f3722c"></span>
-                  <span>آموزش قرآن</span>
-                </div>
-                <div class="subject-option" data-name="هنر" data-color="#f8961e">
-                  <span class="subject-color" style="background:#f8961e"></span>
-                  <span>هنر</span>
-                </div>
-                <div class="subject-option" data-name="تربیت بدنی" data-color="#43aa8b">
-                  <span class="subject-color" style="background:#43aa8b"></span>
-                  <span>تربیت بدنی</span>
-                </div>
-                <div class="subject-option" data-name="تفکر و پژوهش" data-color="#277da1">
-                  <span class="subject-color" style="background:#277da1"></span>
-                  <span>تفکر و پژوهش</span>
-                </div>
-                
-                <div class="subject-category">🔵 متوسطه اول (راهنمایی)</div>
-                <div class="subject-option" data-name="فارسی (ادبیات + نگارش)" data-color="#4361ee">
-                  <span class="subject-color" style="background:#4361ee"></span>
-                  <span>فارسی (ادبیات + نگارش)</span>
-                </div>
-                <div class="subject-option" data-name="ریاضی" data-color="#3a0ca3">
-                  <span class="subject-color" style="background:#3a0ca3"></span>
-                  <span>ریاضی</span>
-                </div>
-                <div class="subject-option" data-name="علوم تجربی" data-color="#f72585">
-                  <span class="subject-color" style="background:#f72585"></span>
-                  <span>علوم تجربی</span>
-                </div>
-                <div class="subject-option" data-name="مطالعات اجتماعی" data-color="#4cc9f0">
-                  <span class="subject-color" style="background:#4cc9f0"></span>
-                  <span>مطالعات اجتماعی</span>
-                </div>
-                <div class="subject-option" data-name="پیام‌های آسمان (دینی)" data-color="#f94144">
-                  <span class="subject-color" style="background:#f94144"></span>
-                  <span>پیام‌های آسمان (دینی)</span>
-                </div>
-                <div class="subject-option" data-name="قرآن" data-color="#f3722c">
-                  <span class="subject-color" style="background:#f3722c"></span>
-                  <span>قرآن</span>
-                </div>
-                <div class="subject-option" data-name="عربی" data-color="#f8961e">
-                  <span class="subject-color" style="background:#f8961e"></span>
-                  <span>عربی</span>
-                </div>
-                <div class="subject-option" data-name="زبان انگلیسی" data-color="#43aa8b">
-                  <span class="subject-color" style="background:#43aa8b"></span>
-                  <span>زبان انگلیسی</span>
-                </div>
-                <div class="subject-option" data-name="کار و فناوری" data-color="#277da1">
-                  <span class="subject-color" style="background:#277da1"></span>
-                  <span>کار و فناوری</span>
-                </div>
-                <div class="subject-option" data-name="هنر" data-color="#4cc9f0">
-                  <span class="subject-color" style="background:#4cc9f0"></span>
-                  <span>هنر</span>
-                </div>
-                <div class="subject-option" data-name="تربیت بدنی" data-color="#3a0ca3">
-                  <span class="subject-color" style="background:#3a0ca3"></span>
-                  <span>تربیت بدنی</span>
-                </div>
-                
-                <div class="subject-category">🟣 متوسطه دوم (دبیرستان)</div>
-                <div class="subject-category" style="font-size: 12px; padding: 5px 15px;">رشته ریاضی‌فیزیک</div>
-                <div class="subject-option" data-name="حسابان" data-color="#4361ee">
-                  <span class="subject-color" style="background:#4361ee"></span>
-                  <span>حسابان</span>
-                </div>
-                <div class="subject-option" data-name="هندسه" data-color="#3a0ca3">
-                  <span class="subject-color" style="background:#3a0ca3"></span>
-                  <span>هندسه</span>
-                </div>
-                <div class="subject-option" data-name="آمار و احتمال" data-color="#f72585">
-                  <span class="subject-color" style="background:#f72585"></span>
-                  <span>آمار و احتمال</span>
-                </div>
-                <div class="subject-option" data-name="ریاضی گسسته" data-color="#4cc9f0">
-                  <span class="subject-color" style="background:#4cc9f0"></span>
-                  <span>ریاضی گسسته</span>
-                </div>
-                <div class="subject-option" data-name="فیزیک" data-color="#f8961e">
-                  <span class="subject-color" style="background:#f8961e"></span>
-                  <span>فیزیک</span>
-                </div>
-                <div class="subject-option" data-name="شیمی" data-color="#f94144">
-                  <span class="subject-color" style="background:#f94144"></span>
-                  <span>شیمی</span>
-                </div>
-                <div class="subject-option" data-name="زبان انگلیسی" data-color="#f3722c">
-                  <span class="subject-color" style="background:#f3722c"></span>
-                  <span>زبان انگلیسی</span>
-                </div>
-                <div class="subject-option" data-name="عربی" data-color="#f8961e">
-                  <span class="subject-color" style="background:#f8961e"></span>
-                  <span>عربی</span>
-                </div>
-                <div class="subject-option" data-name="دینی (دین و زندگی)" data-color="#43aa8b">
-                  <span class="subject-color" style="background:#43aa8b"></span>
-                  <span>دینی (دین و زندگی)</span>
-                </div>
-                <div class="subject-option" data-name="فارسی (ادبیات + نگارش)" data-color="#277da1">
-                  <span class="subject-color" style="background:#277da1"></span>
-                  <span>فارسی (ادبیات + نگارش)</span>
-                </div>
-                <div class="subject-option" data-name="زبان فارسی (تاریخ ادبیات و آرایه‌ها)" data-color="#4361ee">
-                  <span class="subject-color" style="background:#4361ee"></span>
-                  <span>زبان فارسی (تاریخ ادبیات و آرایه‌ها)</span>
-                </div>
-                <div class="subject-option" data-name="جامعه‌شناسی / منطق / فلسفه (عمومی)" data-color="#3a0ca3">
-                  <span class="subject-color" style="background:#3a0ca3"></span>
-                  <span>جامعه‌شناسی / منطق / فلسفه (عمومی)</span>
-                </div>
-                <div class="subject-option" data-name="تربیت بدنی" data-color="#f72585">
-                  <span class="subject-color" style="background:#f72585"></span>
-                  <span>تربیت بدنی</span>
-                </div>
-                
-                <div class="subject-category" style="font-size: 12px; padding: 5px 15px;">رشته تجربی</div>
-                <div class="subject-option" data-name="ریاضی" data-color="#4cc9f0">
-                  <span class="subject-color" style="background:#4cc9f0"></span>
-                  <span>ریاضی</span>
-                </div>
-                <div class="subject-option" data-name="فیزیک" data-color="#f8961e">
-                  <span class="subject-color" style="background:#f8961e"></span>
-                  <span>فیزیک</span>
-                </div>
-                <div class="subject-option" data-name="شیمی" data-color="#f94144">
-                  <span class="subject-color" style="background:#f94144"></span>
-                  <span>شیمی</span>
-                </div>
-                <div class="subject-option" data-name="زیست‌شناسی" data-color="#f3722c">
-                  <span class="subject-color" style="background:#f3722c"></span>
-                  <span>زیست‌شناسی</span>
-                </div>
-                <div class="subject-option" data-name="زمین‌شناسی" data-color="#f8961e">
-                  <span class="subject-color" style="background:#f8961e"></span>
-                  <span>زمین‌شناسی</span>
-                </div>
-                <div class="subject-option" data-name="زبان انگلیسی" data-color="#43aa8b">
-                  <span class="subject-color" style="background:#43aa8b"></span>
-                  <span>زبان انگلیسی</span>
-                </div>
-                <div class="subject-option" data-name="عربی" data-color="#277da1">
-                  <span class="subject-color" style="background:#277da1"></span>
-                  <span>عربی</span>
-                </div>
-                <div class="subject-option" data-name="دینی (دین و زندگی)" data-color="#4361ee">
-                  <span class="subject-color" style="background:#4361ee"></span>
-                  <span>دینی (دین و زندگی)</span>
-                </div>
-                <div class="subject-option" data-name="فارسی (ادبیات + نگارش)" data-color="#3a0ca3">
-                  <span class="subject-color" style="background:#3a0ca3"></span>
-                  <span>فارسی (ادبیات + نگارش)</span>
-                </div>
-                <div class="subject-option" data-name="زبان فارسی (آرایه‌ها، تاریخ ادبیات)" data-color="#f72585">
-                  <span class="subject-color" style="background:#f72585"></span>
-                  <span>زبان فارسی (آرایه‌ها، تاریخ ادبیات)</span>
-                </div>
-                <div class="subject-option" data-name="فلسفه / جامعه‌شناسی (عمومی)" data-color="#4cc9f0">
-                  <span class="subject-color" style="background:#4cc9f0"></span>
-                  <span>فلسفه / جامعه‌شناسی (عمومی)</span>
-                </div>
-                <div class="subject-option" data-name="تربیت بدنی" data-color="#f8961e">
-                  <span class="subject-color" style="background:#f8961e"></span>
-                  <span>تربیت بدنی</span>
-                </div>
-                
-                <div class="subject-category" style="font-size: 12px; padding: 5px 15px;">رشته انسانی</div>
-                <div class="subject-option" data-name="علوم و فنون ادبی" data-color="#f94144">
-                  <span class="subject-color" style="background:#f94144"></span>
-                  <span>علوم و فنون ادبی</span>
-                </div>
-                <div class="subject-option" data-name="عربی (تخصصی + عمومی)" data-color="#f3722c">
-                  <span class="subject-color" style="background:#f3722c"></span>
-                  <span>عربی (تخصصی + عمومی)</span>
-                </div>
-                <div class="subject-option" data-name="تاریخ" data-color="#f8961e">
-                  <span class="subject-color" style="background:#f8961e"></span>
-                  <span>تاریخ</span>
-                </div>
-                <div class="subject-option" data-name="جغرافیا" data-color="#43aa8b">
-                  <span class="subject-color" style="background:#43aa8b"></span>
-                  <span>جغرافیا</span>
-                </div>
-                <div class="subject-option" data-name="جامعه‌شناسی" data-color="#277da1">
-                  <span class="subject-color" style="background:#277da1"></span>
-                  <span>جامعه‌شناسی</span>
-                </div>
-                <div class="subject-option" data-name="اقتصاد" data-color="#4361ee">
-                  <span class="subject-color" style="background:#4361ee"></span>
-                  <span>اقتصاد</span>
-                </div>
-                <div class="subject-option" data-name="روانشناسی" data-color="#3a0ca3">
-                  <span class="subject-color" style="background:#3a0ca3"></span>
-                  <span>روانشناسی</span>
-                </div>
-                <div class="subject-option" data-name="فلسفه" data-color="#f72585">
-                  <span class="subject-color" style="background:#f72585"></span>
-                  <span>فلسفه</span>
-                </div>
-                <div class="subject-option" data-name="منطق" data-color="#4cc9f0">
-                  <span class="subject-color" style="background:#4cc9f0"></span>
-                  <span>منطق</span>
-                </div>
-                <div class="subject-option" data-name="ریاضی و آمار" data-color="#f8961e">
-                  <span class="subject-color" style="background:#f8961e"></span>
-                  <span>ریاضی و آمار</span>
-                </div>
-                <div class="subject-option" data-name="زبان انگلیسی" data-color="#f94144">
-                  <span class="subject-color" style="background:#f94144"></span>
-                  <span>زبان انگلیسی</span>
-                </div>
-                <div class="subject-option" data-name="دینی (دین و زندگی)" data-color="#f3722c">
-                  <span class="subject-color" style="background:#f3722c"></span>
-                  <span>دینی (دین و زندگی)</span>
-                </div>
-                <div class="subject-option" data-name="تربیت بدنی" data-color="#43aa8b">
-                  <span class="subject-color" style="background:#43aa8b"></span>
-                  <span>تربیت بدنی</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="subjects-badges" id="subjectsBadges"></div>
-
-          <div class="deadline-section">
-            <div class="deadline-header">
-              <label class="form-label">مهلت تحویل</label>
-              <div class="deadline-toggle">
-                <span>فعال شود؟</span>
-                <label class="toggle-switch">
-                  <input type="checkbox" id="deadlineToggle">
-                  <span class="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-            <div class="deadline-fields" id="deadlineFields">
-              <div class="form-group">
-                <label class="form-label">تاریخ مهلت</label>
-                <input type="text" id="taskDeadlineDate" class="form-control" placeholder="انتخاب تاریخ">
-              </div>
-              <div class="form-group">
-                <label class="form-label">ساعت مهلت</label>
-                <input type="time" id="taskDeadlineTime" class="form-control">
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row-3">
+          <form id="task-form">
             <div class="form-group">
-              <label class="form-label">اولویت</label>
-              <select id="taskPriority" class="form-control">
-                <option value="normal">معمولی</option>
-                <option value="high">بالا</option>
-                <option value="low">کم</option>
-              </select>
+              <label class="form-label">عنوان تکلیف</label>
+              <input type="text" id="title" class="form-control" placeholder="مثلاً حل تمرین فصل ۲" required>
             </div>
-            <div class="form-group">
-              <label class="form-label">وضعیت</label>
-              <select id="taskStatus" class="form-control">
-                <option value="open">باز</option>
-                <option value="done">انجام‌شده</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">اعضای گروه</label>
-              <input type="text" id="taskMembers" class="form-control" placeholder="مثلاً: علی، سارا">
-            </div>
-          </div>
 
-          <div class="optional-section">
-            <div class="optional-toggle" id="optionalToggle">
-              <span>گزینه‌های اختیاری</span>
-              <span>▼</span>
+            <div class="form-group">
+              <label class="form-label">درس</label>
+              <div class="subject-selector">
+                <select id="subject" name="subject" required class="form-control">
+                  <option value="" disabled selected>یک درس را انتخاب کن…</option>
+                  <optgroup label="🟢 ابتدایی (دبستان)">
+                    <option value="فارسی (خوانداری + نگارش)" data-color="#4361ee">فارسی (خوانداری + نگارش)</option>
+                    <option value="ریاضی" data-color="#3a0ca3">ریاضی</option>
+                    <option value="علوم تجربی" data-color="#f72585">علوم تجربی</option>
+                    <option value="مطالعات اجتماعی" data-color="#4cc9f0">مطالعات اجتماعی</option>
+                    <option value="قرآن" data-color="#f8961e">قرآن</option>
+                    <option value="هدیه‌های آسمان (دینی)" data-color="#f94144">هدیه‌های آسمان (دینی)</option>
+                    <option value="آموزش قرآن" data-color="#f3722c">آموزش قرآن</option>
+                    <option value="هنر" data-color="#f8961e">هنر</option>
+                    <option value="تربیت بدنی" data-color="#43aa8b">تربیت بدنی</option>
+                    <option value="تفکر و پژوهش" data-color="#277da1">تفکر و پژوهش</option>
+                  </optgroup>
+                  <optgroup label="🔵 متوسطه اول (راهنمایی)">
+                    <option value="فارسی (ادبیات + نگارش)" data-color="#4361ee">فارسی (ادبیات + نگارش)</option>
+                    <option value="ریاضی" data-color="#3a0ca3">ریاضی</option>
+                    <option value="علوم تجربی" data-color="#f72585">علوم تجربی</option>
+                    <option value="مطالعات اجتماعی" data-color="#4cc9f0">مطالعات اجتماعی</option>
+                    <option value="پیام‌های آسمان (دینی)" data-color="#f94144">پیام‌های آسمان (دینی)</option>
+                    <option value="قرآن" data-color="#f3722c">قرآن</option>
+                    <option value="عربی" data-color="#f8961e">عربی</option>
+                    <option value="زبان انگلیسی" data-color="#43aa8b">زبان انگلیسی</option>
+                    <option value="کار و فناوری" data-color="#277da1">کار و فناوری</option>
+                    <option value="هنر" data-color="#4cc9f0">هنر</option>
+                    <option value="تربیت بدنی" data-color="#3a0ca3">تربیت بدنی</option>
+                  </optgroup>
+                  <optgroup label="🟣 متوسطه دوم (دبیرستان)">
+                    <optgroup label="رشته ریاضی‌فیزیک">
+                      <option value="حسابان" data-color="#4361ee">حسابان</option>
+                      <option value="هندسه" data-color="#3a0ca3">هندسه</option>
+                      <option value="آمار و احتمال" data-color="#f72585">آمار و احتمال</option>
+                      <option value="ریاضی گسسته" data-color="#4cc9f0">ریاضی گسسته</option>
+                      <option value="فیزیک" data-color="#f8961e">فیزیک</option>
+                      <option value="شیمی" data-color="#f94144">شیمی</option>
+                      <option value="زبان انگلیسی" data-color="#f3722c">زبان انگلیسی</option>
+                      <option value="عربی" data-color="#f8961e">عربی</option>
+                      <option value="دینی (دین و زندگی)" data-color="#43aa8b">دینی (دین و زندگی)</option>
+                      <option value="فارسی (ادبیات + نگارش)" data-color="#277da1">فارسی (ادبیات + نگارش)</option>
+                      <option value="زبان فارسی (تاریخ ادبیات و آرایه‌ها)" data-color="#4361ee">زبان فارسی (تاریخ ادبیات و آرایه‌ها)</option>
+                      <option value="جامعه‌شناسی / منطق / فلسفه (عمومی)" data-color="#3a0ca3">جامعه‌شناسی / منطق / فلسفه (عمومی)</option>
+                      <option value="تربیت بدنی" data-color="#f72585">تربیت بدنی</option>
+                    </optgroup>
+                    <optgroup label="رشته تجربی">
+                      <option value="ریاضی" data-color="#4cc9f0">ریاضی</option>
+                      <option value="فیزیک" data-color="#f8961e">فیزیک</option>
+                      <option value="شیمی" data-color="#f94144">شیمی</option>
+                      <option value="زیست‌شناسی" data-color="#f3722c">زیست‌شناسی</option>
+                      <option value="زمین‌شناسی" data-color="#f8961e">زمین‌شناسی</option>
+                      <option value="زبان انگلیسی" data-color="#43aa8b">زبان انگلیسی</option>
+                      <option value="عربی" data-color="#277da1">عربی</option>
+                      <option value="دینی (دین و زندگی)" data-color="#4361ee">دینی (دین و زندگی)</option>
+                      <option value="فارسی (ادبیات + نگارش)" data-color="#3a0ca3">فارسی (ادبیات + نگارش)</option>
+                      <option value="زبان فارسی (آرایه‌ها، تاریخ ادبیات)" data-color="#f72585">زبان فارسی (آرایه‌ها، تاریخ ادبیات)</option>
+                      <option value="فلسفه / جامعه‌شناسی (عمومی)" data-color="#4cc9f0">فلسفه / جامعه‌شناسی (عمومی)</option>
+                      <option value="تربیت بدنی" data-color="#f8961e">تربیت بدنی</option>
+                    </optgroup>
+                    <optgroup label="رشته انسانی">
+                      <option value="علوم و فنون ادبی" data-color="#f94144">علوم و فنون ادبی</option>
+                      <option value="عربی (تخصصی + عمومی)" data-color="#f3722c">عربی (تخصصی + عمومی)</option>
+                      <option value="تاریخ" data-color="#f8961e">تاریخ</option>
+                      <option value="جغرافیا" data-color="#43aa8b">جغرافیا</option>
+                      <option value="جامعه‌شناسی" data-color="#277da1">جامعه‌شناسی</option>
+                      <option value="اقتصاد" data-color="#4361ee">اقتصاد</option>
+                      <option value="روانشناسی" data-color="#3a0ca3">روانشناسی</option>
+                      <option value="فلسفه" data-color="#f72585">فلسفه</option>
+                      <option value="منطق" data-color="#4cc9f0">منطق</option>
+                      <option value="ریاضی و آمار" data-color="#f8961e">ریاضی و آمار</option>
+                      <option value="زبان انگلیسی" data-color="#f94144">زبان انگلیسی</option>
+                      <option value="دینی (دین و زندگی)" data-color="#f3722c">دینی (دین و زندگی)</option>
+                      <option value="تربیت بدنی" data-color="#43aa8b">تربیت بدنی</option>
+                    </optgroup>
+                  </optgroup>
+                </select>
+              </div>
             </div>
-            <div class="optional-content" id="optionalContent">
+
+            <div class="subjects-badges" id="subjectsBadges"></div>
+
+            <div class="deadline-section">
+              <div class="deadline-header">
+                <label class="form-label">مهلت تحویل</label>
+                <div class="deadline-toggle">
+                  <span>فعال شود؟</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="deadline-enabled">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div id="deadline-fields" style="display:none">
+                <div class="form-group">
+                  <label class="form-label">تاریخ مهلت</label>
+                  <input id="deadline-date" class="form-control" placeholder="انتخاب تاریخ (شمسی)" autocomplete="off">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">ساعت مهلت</label>
+                  <input id="deadline-time" type="time" class="form-control" value="18:00">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row-3">
               <div class="form-group">
-                <label class="form-label">یادآوری (دقیقه قبل از موعد)</label>
-                <input type="number" id="taskRemind" class="form-control" placeholder="مثلاً 120">
+                <label class="form-label">اولویت</label>
+                <select id="taskPriority" class="form-control">
+                  <option value="normal">معمولی</option>
+                  <option value="high">بالا</option>
+                  <option value="low">کم</option>
+                </select>
               </div>
               <div class="form-group">
-                <label class="form-label">توضیحات</label>
-                <textarea id="taskNotes" class="form-control" rows="3" placeholder="توضیحات تکلیف..."></textarea>
+                <label class="form-label">وضعیت</label>
+                <select id="taskStatus" class="form-control">
+                  <option value="open">باز</option>
+                  <option value="done">انجام‌شده</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">اعضای گروه</label>
+                <input type="text" id="taskMembers" class="form-control" placeholder="مثلاً: علی، سارا">
               </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <button id="addTaskBtn" class="btn btn-primary" style="width: 100%;">ثبت تکلیف</button>
-          </div>
+            <details id="optional-box">
+              <summary>گزینه‌های اختیاری</summary>
+              <div class="form-group">
+                <label for="reminder">یادآوری (دقیقه قبل از موعد)</label>
+                <input id="reminder" type="number" min="0" step="5" class="form-control" placeholder="مثلاً 15">
+              </div>
+              <div class="form-group">
+                <label for="notes">توضیحات</label>
+                <textarea id="notes" rows="3" class="form-control"></textarea>
+              </div>
+            </details>
+
+            <div class="form-group">
+              <button type="submit" id="addTaskBtn" class="btn btn-primary" style="width: 100%;">ثبت تکلیف</button>
+            </div>
+          </form>
 
           <div class="stats-container">
             <div class="stat-card">
@@ -1158,7 +993,7 @@
       </div>
 
       <!-- Right Column: Tasks List -->
-      <div class="card">
+      <div class="card" id="board">
         <div class="card-header">
           <div class="card-title">
             <div class="card-icon">📝</div>
@@ -1211,9 +1046,6 @@
     <button class="notification-close">×</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <script>
     // --- Utilities
     const $ = sel => document.querySelector(sel);
@@ -1275,66 +1107,11 @@
       themeToggle.textContent = isLight ? '☀️' : '🌙';
     });
     
-    // --- Initialize Persian Date Picker
-    $(document).ready(function() {
-      $("#taskDeadlineDate").persianDatepicker({
-        format: 'YYYY/MM/DD',
-        observer: true,
-        initialValue: false,
-        autoClose: true,
-        position: 'auto'
-      });
-    });
-    
     let state = loadData();
     
     // --- Subject Selector
-    const subjectSearch = $('#subjectSearch');
-    const subjectDropdown = $('#subjectDropdown');
+    const subjectSelect = $('#subject');
     const subjectsBadges = $('#subjectsBadges');
-    
-    // Show dropdown when search input is focused
-    subjectSearch.addEventListener('focus', () => {
-      subjectDropdown.classList.add('show');
-    });
-    
-    // Hide dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.subject-selector')) {
-        subjectDropdown.classList.remove('show');
-      }
-    });
-    
-    // Handle subject selection
-    $$('.subject-option').forEach(option => {
-      option.addEventListener('click', () => {
-        const name = option.dataset.name;
-        const color = option.dataset.color;
-        
-        // Add subject if not exists
-        if (!state.subjects.find(s => s.name === name)) {
-          state.subjects.push({ id: uid(), name, color });
-          saveData(state);
-        }
-        
-        // Update search input
-        subjectSearch.value = name;
-        subjectDropdown.classList.remove('show');
-        
-        // Update badges
-        renderSubjectsBadges();
-        showNotification(`درس ${name} انتخاب شد`, 2000);
-      });
-    });
-    
-    // Filter subjects based on search input
-    subjectSearch.addEventListener('input', () => {
-      const query = subjectSearch.value.toLowerCase();
-      $$('.subject-option').forEach(option => {
-        const name = option.dataset.name.toLowerCase();
-        option.style.display = name.includes(query) ? 'flex' : 'none';
-      });
-    });
     
     function renderSubjectsBadges() {
       subjectsBadges.innerHTML = '';
@@ -1347,28 +1124,6 @@
     }
     
     renderSubjectsBadges();
-    
-    // --- Deadline Toggle
-    const deadlineToggle = $('#deadlineToggle');
-    const deadlineFields = $('#deadlineFields');
-    
-    deadlineToggle.addEventListener('change', () => {
-      if (deadlineToggle.checked) {
-        deadlineFields.classList.add('show');
-      } else {
-        deadlineFields.classList.remove('show');
-      }
-    });
-    
-    // --- Optional Section Toggle
-    const optionalToggle = $('#optionalToggle');
-    const optionalContent = $('#optionalContent');
-    
-    optionalToggle.addEventListener('click', () => {
-      optionalContent.classList.toggle('show');
-      const arrow = optionalToggle.querySelector('span:last-child');
-      arrow.textContent = optionalContent.classList.contains('show') ? '▲' : '▼';
-    });
     
     // --- Tasks
     function renderKPIs(tasks) {
@@ -1567,33 +1322,32 @@
       
       const subject = subjectById(t.subjectId);
       if (subject) {
-        subjectSearch.value = subject.name;
+        subjectSelect.value = subject.name;
       }
       
       if (t.deadline) {
-        deadlineToggle.checked = true;
-        deadlineFields.classList.add('show');
+        $('#deadline-enabled').prop('checked', true);
+        $('#deadline-fields').show();
         
         const date = new persianDate(new Date(t.deadline));
-        $('#taskDeadlineDate').value = date.format('YYYY/MM/DD');
+        $('#deadline-date').val(date.format('YYYY/MM/DD'));
         
         const time = new Date(t.deadline);
-        $('#taskDeadlineTime').value = time.toTimeString().slice(0, 5);
+        $('#deadline-time').val(time.toTimeString().slice(0, 5));
       } else {
-        deadlineToggle.checked = false;
-        deadlineFields.classList.remove('show');
+        $('#deadline-enabled').prop('checked', false);
+        $('#deadline-fields').hide();
       }
       
-      $('#taskPriority').value = t.priority || 'normal';
-      $('#taskStatus').value = t.completed ? 'done' : 'open';
-      $('#taskMembers').value = t.members || '';
+      $('#taskPriority').val(t.priority || 'normal');
+      $('#taskStatus').val(t.completed ? 'done' : 'open');
+      $('#taskMembers').val(t.members || '');
       
       if (t.remindMinutes || t.notes) {
-        optionalContent.classList.add('show');
-        optionalToggle.querySelector('span:last-child').textContent = '▲';
+        $('#optional-box').prop('open', true);
         
-        $('#taskRemind').value = t.remindMinutes || '';
-        $('#taskNotes').value = t.notes || '';
+        $('#reminder').val(t.remindMinutes || '');
+        $('#notes').val(t.notes || '');
       }
       
       // Overwrite by saving with same id
@@ -1603,17 +1357,34 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
-    $('#addTaskBtn').addEventListener('click', () => {
-      const title = $('#taskTitle').value.trim();
-      const subjectName = subjectSearch.value.trim();
+    // Update subject filter dropdown
+    function updateSubjectFilter() {
+      const filterSubject = $('#filterSubject');
+      filterSubject.innerHTML = '<option value="">همه درس‌ها</option>';
+      
+      state.subjects.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.id; 
+        opt.textContent = s.name;
+        filterSubject.appendChild(opt);
+      });
+    }
+    
+    updateSubjectFilter();
+    
+    // Form submission
+    $('#task-form').on('submit', function(e) {
+      e.preventDefault();
+      
+      const title = $('#title').val().trim();
+      const subjectName = subjectSelect.val();
+      const subjectOption = subjectSelect.find('option:selected');
+      const subjectColor = subjectOption.data('color') || '#4361ee';
       
       // Find or create subject
       let subject = state.subjects.find(s => s.name === subjectName);
       if (!subject && subjectName) {
-        // Create new subject with random color
-        const colors = ['#4361ee', '#3a0ca3', '#f72585', '#4cc9f0', '#f8961e', '#f94144', '#f3722c', '#43aa8b', '#277da1'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        subject = { id: uid(), name: subjectName, color };
+        subject = { id: uid(), name: subjectName, color: subjectColor };
         state.subjects.push(subject);
         saveData(state);
         renderSubjectsBadges();
@@ -1622,9 +1393,9 @@
       const subjectId = subject ? subject.id : '';
       
       let deadline = null;
-      if (deadlineToggle.checked) {
-        const dateStr = $('#taskDeadlineDate').value;
-        const timeStr = $('#taskDeadlineTime').value;
+      if ($('#deadline-enabled').is(':checked')) {
+        const dateStr = $('#deadline-date').val();
+        const timeStr = $('#deadline-time').val();
         
         if (dateStr) {
           // Convert Persian date to Gregorian
@@ -1640,11 +1411,11 @@
         }
       }
       
-      const priority = $('#taskPriority').value || 'normal';
-      const status = $('#taskStatus').value === 'done';
-      const members = $('#taskMembers').value.trim();
-      const remindMinutes = parseInt($('#taskRemind').value || '0', 10) || 0;
-      const notes = $('#taskNotes').value.trim();
+      const priority = $('#taskPriority').val() || 'normal';
+      const status = $('#taskStatus').val() === 'done';
+      const members = $('#taskMembers').val().trim();
+      const remindMinutes = parseInt($('#reminder').val() || '0', 10) || 0;
+      const notes = $('#notes').val().trim();
       
       if (!title) {
         showNotification('عنوان تکلیف را وارد کنید', 2000);
@@ -1656,7 +1427,7 @@
         return;
       }
       
-      const editId = $('#addTaskBtn').dataset.editId;
+      const editId = $('#addTaskBtn').data('editId');
       if (editId) {
         const t = state.tasks.find(x => x.id === editId);
         if (t) {
@@ -1669,8 +1440,8 @@
           t.remindMinutes = remindMinutes;
           t.notes = notes;
         }
-        $('#addTaskBtn').textContent = 'ثبت تکلیف';
-        delete $('#addTaskBtn').dataset.editId;
+        $('#addTaskBtn').text('ثبت تکلیف');
+        $('#addTaskBtn').removeData('editId');
         showNotification('تکلیف با موفقیت ویرایش شد', 2000);
       } else {
         state.tasks.push({
@@ -1689,128 +1460,24 @@
       }
       
       saveData(state);
-      clearTaskForm();
+      this.reset();
+      $('#deadline-fields').hide();
+      $('#optional-box').prop('open', false);
       renderTasks();
     });
     
     function clearTaskForm() {
-      $('#taskTitle').value = '';
-      subjectSearch.value = '';
-      deadlineToggle.checked = false;
-      deadlineFields.classList.remove('show');
-      $('#taskDeadlineDate').value = '';
-      $('#taskDeadlineTime').value = '';
-      $('#taskPriority').value = 'normal';
-      $('#taskStatus').value = 'open';
-      $('#taskMembers').value = '';
-      $('#taskRemind').value = '';
-      $('#taskNotes').value = '';
-      optionalContent.classList.remove('show');
-      optionalToggle.querySelector('span:last-child').textContent = '▼';
+      $('#task-form')[0].reset();
+      $('#deadline-fields').hide();
+      $('#optional-box').prop('open', false);
     }
-    
-    // Update subject filter dropdown
-    function updateSubjectFilter() {
-      const filterSubject = $('#filterSubject');
-      filterSubject.innerHTML = '<option value="">همه درس‌ها</option>';
-      
-      state.subjects.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.id; 
-        opt.textContent = s.name;
-        filterSubject.appendChild(opt);
-      });
-    }
-    
-    updateSubjectFilter();
     
     ['#searchBox', '#filterSubject', '#filterStatus', '#sortBy'].forEach(sel => {
-      $(sel).addEventListener('input', renderTasks);
-      $(sel).addEventListener('change', renderTasks);
-    });
-    
-    // --- Notifications
-    function loadNotifiedSet() {
-      try {
-        const raw = localStorage.getItem(notifiedKey);
-        if (!raw) return new Set();
-        return new Set(JSON.parse(raw));
-      } catch { 
-        return new Set() 
-      }
-    }
-    
-    function saveNotifiedSet(set) {
-      localStorage.setItem(notifiedKey, JSON.stringify(Array.from(set)));
-    }
-    
-    let notified = loadNotifiedSet();
-    
-    function checkReminders() {
-      if (!('Notification' in window) || Notification.permission !== 'granted') return;
-      
-      const now = Date.now();
-      state.tasks.forEach(t => {
-        if (t.completed || !t.deadline || !t.remindMinutes) return;
-        
-        const deadlineTs = new Date(t.deadline).getTime();
-        const triggerTs = deadlineTs - t.remindMinutes * 60 * 1000;
-        
-        if (now >= triggerTs && now <= deadlineTs && !notified.has(t.id)) {
-          const subject = subjectById(t.subjectId);
-          const body = (subject ? ('درس ' + subject.name + ' — ') : '') + 'زمان تحویل: ' + toPersianDateTime(t.deadline);
-          
-          new Notification('یادآوری تکلیف: ' + t.title, { body });
-          notified.add(t.id);
-          saveNotifiedSet(notified);
-        }
-      });
-    }
-    
-    setInterval(checkReminders, 60 * 1000); // هر دقیقه
-    document.addEventListener('visibilitychange', () => { 
-      if (!document.hidden) checkReminders(); 
-    });
-    
-    // --- Export as PNG
-    $('#exportPngBtn').addEventListener('click', () => {
-      const tasksList = $('#tasksList');
-      
-      if (state.tasks.length === 0) {
-        showNotification('هیچ تکلیفی برای خروجی وجود ندارد', 2000);
-        return;
-      }
-      
-      // Temporarily remove empty state if it exists
-      const emptyState = $('#emptyState');
-      const wasEmptyStateVisible = emptyState.style.display !== 'none';
-      if (wasEmptyStateVisible) {
-        emptyState.style.display = 'none';
-      }
-      
-      html2canvas(tasksList, {
-        backgroundColor: body.classList.contains('light-theme') ? '#ffffff' : '#1d3557',
-        scale: 2
-      }).then(canvas => {
-        // Restore empty state if it was visible
-        if (wasEmptyStateVisible) {
-          emptyState.style.display = 'block';
-        }
-        
-        const link = document.createElement('a');
-        link.download = `mashqyar-tasks-${new Date().toISOString().slice(0, 10)}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        
-        showNotification('خروجی PNG با موفقیت ایجاد شد', 2000);
-      }).catch(error => {
-        console.error('Error exporting PNG:', error);
-        showNotification('خطا در ایجاد خروجی PNG', 2000);
-      });
+      $(sel).on('input change', renderTasks);
     });
     
     // --- Clear All
-    $('#clearBtn').addEventListener('click', () => {
+    $('#clearBtn').on('click', () => {
       if (confirm('کل داده‌های محلی حذف شود؟')) {
         localStorage.removeItem(storeKey);
         localStorage.removeItem(notifiedKey);
@@ -1868,6 +1535,147 @@
       renderSubjectsBadges();
       renderTasks();
     }
+  </script>
+
+  <!-- ====== Deadline toggle + Persian datepicker ====== -->
+  <script>
+  (function(){
+    const $date = $('#deadline-date');
+    const $time = $('#deadline-time');
+    const $box  = $('#deadline-fields');
+    const $chk  = $('#deadline-enabled');
+    if ($date.length && !$date.data('hasPdp')) {
+      $date.persianDatepicker({
+        initialValue: false,
+        format: 'YYYY/MM/DD',
+        autoClose: true,
+        calendar: { persian: { locale: 'fa' } }
+      });
+      $date.data('hasPdp', true);
+    }
+    function toggleDeadlineUI(){
+      if ($chk.is(':checked')) $box.show(); else $box.hide();
+    }
+    $chk.on('change', toggleDeadlineUI);
+    toggleDeadlineUI();
+    // helper: تبدیل تاریخ شمسی + ساعت به timestamp میلادی
+    window.__mashqyar__toTs = function(persianDateStr, timeStr){
+      if (!persianDateStr) return null;
+      try{
+        const pd = new persianDate().parse(persianDateStr).toDate(); // میلادی
+        const [hh='00', mm='00'] = (timeStr||'00:00').split(':');
+        pd.setHours(+hh, +mm, 0, 0);
+        return pd.getTime();
+      }catch(e){ return null; }
+    };
+  })();
+  </script>
+
+  <!-- ====== Export PNG with html2canvas ====== -->
+  <script>
+  (function(){
+    const btn = document.getElementById('btn-export');
+    const board = document.getElementById('board');
+    if (!btn || !board) return;
+    btn.addEventListener('click', async () => {
+      try{
+        const canvas = await html2canvas(board, { useCORS: true, scale: 2 });
+        const url = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.href = url; a.download = 'mashqyar.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        showNotification('خروجی PNG با موفقیت ایجاد شد', 2000);
+      }catch(e){ 
+        console.error('Error exporting PNG:', e);
+        showNotification('خطا در ایجاد خروجی PNG', 2000);
+      }
+    });
+  })();
+  </script>
+
+  <!-- ====== Schedule Notifications on submit ====== -->
+  <script>
+  (function(){
+    const form = document.getElementById('task-form');
+    if (!form) return;
+    async function ensurePermission(){
+      if (!('Notification' in window)) return false;
+      if (Notification.permission === 'granted') return true;
+      if (Notification.permission === 'denied') return false;
+      const p = await Notification.requestPermission();
+      return p === 'granted';
+    }
+    function scheduleReminder({id, title, subject, deadlineTs, reminderMin}){
+      if (!deadlineTs || !reminderMin || reminderMin<=0) return;
+      const fireAt = deadlineTs - reminderMin*60*1000;
+      if (isNaN(fireAt) || fireAt <= Date.now()) return;
+      // ذخیره در localStorage برای بازسازی بعد از ریفرش
+      const key = 'mashqyar.reminders.v1';
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      const exists = list.find(x=>x.id===id);
+      const payload = { id, title, subject, fireAt, shown:false };
+      if (!exists) list.push(payload); else Object.assign(exists, payload);
+      localStorage.setItem(key, JSON.stringify(list));
+      // زمان‌بندی داخل سشن فعلی
+      const delay = fireAt - Date.now();
+      window.setTimeout(()=>showReminder(id, title, subject), delay);
+    }
+    function showReminder(id, title, subject){
+      try{
+        new Notification('یادآوری تکلیف', {
+          body: subject ? `${title} — ${subject}` : title,
+          icon: 'MashqYarMatn2.png'
+        });
+      }catch(_){}
+      // علامت‌گذاری به‌عنوان نمایش‌داده‌شده
+      const key = 'mashqyar.reminders.v1';
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      const it = list.find(x=>x.id===id);
+      if (it) { it.shown = true; localStorage.setItem(key, JSON.stringify(list)); }
+    }
+    window.__mashqyar__showReminder = showReminder;
+    form.addEventListener('submit', async (ev)=>{
+      // این کد فقط اطلاعات رو میگیره؛ خودت اگر submit دیگه‌ای داری، مزاحم نمیشه
+      const ok = await ensurePermission(); // درخواست مجوز
+      const title   = (document.getElementById('title')||{}).value || 'تکلیف';
+      const subject = (document.getElementById('subject')||{}).value || '';
+      const pd      = (document.getElementById('deadline-date')||{}).value;
+      const tm      = (document.getElementById('deadline-time')||{}).value;
+      const enabled = (document.getElementById('deadline-enabled')||{}).checked;
+      const reminderMin = parseInt((document.getElementById('reminder')||{}).value,10) || 0;
+      if (!ok || !enabled || !reminderMin) return; // مجوز نداریم یا یادآوری نخواست
+      const deadlineTs = window.__mashqyar__toTs ? window.__mashqyar__toTs(pd, tm) : null;
+      // ساخت یک id پایدار برای این تکلیف: ترکیب عنوان+زمان‌ساخت
+      const id = 't-' + title + '-' + Date.now();
+      scheduleReminder({id, title, subject, deadlineTs, reminderMin});
+    }, true); // capture=true تا قبل از جلوگیری احتمالی هم بگیریم
+  })();
+  </script>
+
+  <!-- ====== Rebuild reminders on page load ====== -->
+  <script>
+  (function(){
+    if (!('Notification' in window)) return;
+    const key = 'mashqyar.reminders.v1';
+    const list = JSON.parse(localStorage.getItem(key) || '[]');
+    for (const it of list){
+      if (it.shown) continue;
+      const delay = it.fireAt - Date.now();
+      if (delay <= 0){
+        // اگر گذشته: همین الان نشون بده
+        try{ new Notification('یادآوری تکلیف', { body: it.subject ? `${it.title} — ${it.subject}` : it.title, icon: 'MashqYarMatn2.png' }); }catch(_){}
+        it.shown = true;
+      } else {
+        // زمان‌بندی مجدد
+        window.setTimeout(()=> {
+          try{ new Notification('یادآوری تکلیف', { body: it.subject ? `${it.title} — ${it.subject}` : it.title, icon: 'MashqYarMatn2.png' }); }catch(_){}
+          it.shown = true;
+          localStorage.setItem(key, JSON.stringify(list));
+        }, delay);
+      }
+    }
+    localStorage.setItem(key, JSON.stringify(list));
+  })();
   </script>
 </body>
 </html>
