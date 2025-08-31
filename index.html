@@ -82,14 +82,14 @@
             width: 40px;
             height: 40px;
             border-radius: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 20px;
-            color: white;
+            overflow: hidden; /* برای اینکه گوشه‌های تصویر هم گرد بشه */
             box-shadow: 0 4px 10px rgba(67, 97, 238, 0.4);
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* باعث میشه عکس بدون کشیدگی پر بشه */
         }
         .logo h1 {
             font-size: 24px;
@@ -683,8 +683,9 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <div class="logo-icon">م</div>
-                    <div>
+                    <div class="logo-icon">
+                        <img src="MashqYarLogo.png" alt="logoMashqyar">
+                    </div>
                         <h1>مشق‌یار</h1>
                         <div class="tagline">یادآور تکالیف دانش‌آموزی</div>
                     </div>
@@ -841,7 +842,7 @@
             </div>
         </div>
         <div class="footer">
-            ساخته‌شده با ❤️ برای دانش‌آموزان — نسخهٔ آزمایشی محلی (داده‌ها در مرورگر شما ذخیره می‌شود)
+            ساخته‌شده توسط تیم تکنویار — نسخهٔ آزمایشی محلی (داده‌ها در مرورگر شما ذخیره می‌شود)
         </div>
     </main>
     <!-- مودال برای افزودن درس جدید -->
