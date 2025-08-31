@@ -68,20 +68,19 @@
             background: rgba(255, 255, 255, 0.85);
             border-bottom: 1px solid var(--light-border);
         }
-        .header-content {
+        ..header-content {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         gap: 15px;
-        }    
+        }  
         .logo {
         display: flex;
         align-items: center;
         gap: 12px;
-        flex: 0 1 auto; /* تغییر از 1 1 auto */
-        min-width: 0;
-        white-space: nowrap; /* جلوگیری از شکستن متن */
+        flex: 0 0 auto;
+        margin-left: auto; /* این خط اضافه شده */
         }
         .logo-icon {
         width: 40px;
@@ -113,8 +112,7 @@
         align-items: center;
         gap: 10px;
         flex: 0 0 auto;
-        margin-inline-start: auto;
-        white-space: nowrap; /* جلوگیری از شکستن دکمه‌ها */
+        margin-right: auto;
         }
         .header-actions > * {
         flex: 0 0 auto;
@@ -468,20 +466,21 @@
         .task-btn.complete {
             background: rgba(76, 201, 240, 0.2);
         }
-        .header-content {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
+        header-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
         }
         
         .logo {
+            margin-left: 0;
             justify-content: center;
             text-align: center;
         }
         
         .header-actions {
+            margin-right: 0;
             justify-content: center;
-            margin-inline-start: 0;
         }
         .empty-state {
             text-align: center;
