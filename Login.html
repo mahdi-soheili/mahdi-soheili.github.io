@@ -440,31 +440,86 @@
             }, 1000);
         }
         
-        // Send email using EmailJS with correct template variables
-        async function sendEmailWithCorrectParams(email, code) {
+        // Send email using EmailJS with multiple parameter configurations
+        async function sendEmailWithFallback(email, code) {
             // Calculate expiration time for email template
             const expirationTime = formatExpirationTime();
             
-            // Use the exact variable names from your email template
-            const templateParams = {
-                passcode: code,           // This matches {{passcode}} in your template
-                time: expirationTime       // This matches {{time}} in your template
-            };
+            // Try different parameter configurations
+            const configs = [
+                // Configuration 1: Correct format for your template
+                {
+                    params: {
+                        passcode: code,           // This matches {{passcode}} in your template
+                        time: expirationTime       // This matches {{time}} in your template
+                    },
+                    description: "Correct format (passcode, time)"
+                },
+                // Configuration 2: Standard EmailJS format
+                {
+                    params: {
+                        to_email: email,
+                        code: code,
+                        from_name: 'مشق‌یار'
+                    },
+                    description: "Standard format (to_email, code)"
+                },
+                // Configuration 3: Alternative format
+                {
+                    params: {
+                        email: email,
+                        verification_code: code,
+                        from_name: 'مشق‌یار'
+                    },
+                    description: "Alternative format (email, verification_code)"
+                },
+                // Configuration 4: Mixed format
+                {
+                    params: {
+                        to_email: email,
+                        verification_code: code,
+                        from_name: 'مشق‌یار'
+                    },
+                    description: "Mixed format (to_email, verification_code)"
+                },
+                // Configuration 5: Simple format
+                {
+                    params: {
+                        user_email: email,
+                        confirm_code: code,
+                        from_name: 'مشق‌یار'
+                    },
+                    description: "Simple format (user_email, confirm_code)"
+                }
+            ];
             
-            console.log('Sending email with params:', templateParams);
-            
-            try {
-                const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', templateParams);
-                console.log('EmailJS response:', response);
-                
-                return {
-                    success: true,
-                    response: response
-                };
-            } catch (error) {
-                console.error('Error sending email:', error);
-                throw error;
+            // Try each configuration
+            for (let i = 0; i < configs.length; i++) {
+                const config = configs[i];
+                try {
+                    console.log(`Trying configuration ${i+1}: ${config.description}`, config.params);
+                    
+                    const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', config.params);
+                    console.log(`Configuration ${i+1} succeeded:`, response);
+                    
+                    // Return the successful configuration
+                    return {
+                        success: true,
+                        config: config,
+                        response: response
+                    };
+                } catch (error) {
+                    console.error(`Configuration ${i+1} failed:`, error);
+                    
+                    // If this is the last configuration, throw the error
+                    if (i === configs.length - 1) {
+                        throw new Error(`All email configurations failed. Last error: ${error.message || error.text || error}`);
+                    }
+                }
             }
+            
+            // This should never be reached, but just in case
+            throw new Error("All email configurations failed");
         }
         
         // Send code to email using EmailJS
@@ -484,16 +539,16 @@
             // Generate a new code
             currentCode = generateCode();
             
-            // Show debug info
-            debugInfo.style.display = 'block';
-            debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}`;
+            // Show debug info (hidden from user but visible in console)
+            debugInfo.style.display = 'none';
+            debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}<br>در حال تلاش با پیکربندی‌های مختلف...`;
             
             try {
-                // Send email with correct parameters
-                const result = await sendEmailWithCorrectParams(email, currentCode);
+                // Try to send email with fallback configurations
+                const result = await sendEmailWithFallback(email, currentCode);
                 
-                // Update debug info
-                debugInfo.innerHTML = `ایمیل با موفقیت ارسال شد<br>کد: ${currentCode}<br>پاسخ: ${JSON.stringify(result.response)}`;
+                // Update debug info (hidden from user but visible in console)
+                debugInfo.innerHTML = `ارسال موفق با پیکربندی: ${result.config.description}<br>پارامترها: ${JSON.stringify(result.config.params)}`;
                 
                 // Check if user exists in database
                 const userExists = await checkUserExists(email);
@@ -528,8 +583,8 @@
                 
             } catch (error) {
                 console.error('Error sending code:', error);
-                debugInfo.innerHTML = `خطا: ${error.message || error.text || error}`;
-                showNotification('خطا در ارسال کد تایید: ' + (error.message || error.text || error), 5000);
+                debugInfo.innerHTML = `خطا: ${error.message || error}<br>تمام پیکربندی‌ها آزمایش شدند`;
+                showNotification('خطا در ارسال کد تایید', 2000);
             }
         }
         
@@ -693,16 +748,16 @@
             // Generate a new code
             currentCode = generateCode();
             
-            // Show debug info
-            debugInfo.style.display = 'block';
-            debugInfo.innerHTML = `در حال ارسال مجدد به: ${email}<br>کد جدید: ${currentCode}`;
+            // Show debug info (hidden from user but visible in console)
+            debugInfo.style.display = 'none';
+            debugInfo.innerHTML = `در حال ارسال مجدد به: ${email}<br>کد جدید: ${currentCode}<br>در حال تلاش با پیکربندی‌های مختلف...`;
             
             try {
-                // Send email with correct parameters
-                const result = await sendEmailWithCorrectParams(email, currentCode);
+                // Try to send email with fallback configurations
+                const result = await sendEmailWithFallback(email, currentCode);
                 
-                // Update debug info
-                debugInfo.innerHTML = `ایمیل مجدد با موفقیت ارسال شد<br>کد: ${currentCode}`;
+                // Update debug info (hidden from user but visible in console)
+                debugInfo.innerHTML = `ارسال مجدد موفق با پیکربندی: ${result.config.description}<br>پارامترها: ${JSON.stringify(result.config.params)}`;
                 
                 // Update user's code
                 await updateUserCode(email, currentCode);
@@ -719,8 +774,8 @@
                 
             } catch (error) {
                 console.error('Error resending code:', error);
-                debugInfo.innerHTML = `خطا: ${error.message || error.text || error}`;
-                showNotification('خطا در ارسال مجدد کد: ' + (error.message || error.text || error), 5000);
+                debugInfo.innerHTML = `خطا: ${error.message || error}<br>تمام پیکربندی‌ها آزمایش شدند`;
+                showNotification('خطا در ارسال مجدد کد', 2000);
                 resendBtn.disabled = false;
             }
         }
