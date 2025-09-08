@@ -256,16 +256,6 @@
             width: 100%;
             background: var(--success);
         }
-        .debug-info {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 12px;
-            direction: ltr;
-            text-align: left;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -294,7 +284,6 @@
                         <input type="email" id="emailInput" class="form-control" placeholder="example@email.com" required>
                     </div>
                     <button id="sendCodeBtn" class="btn btn-primary">ارسال کد تایید</button>
-                    <div class="debug-info" id="debugInfo"></div>
                 </div>
                 
                 <!-- Step 2: Code -->
@@ -379,7 +368,6 @@
         const step3 = document.getElementById('step3');
         const line1 = document.getElementById('line1');
         const line2 = document.getElementById('line2');
-        const debugInfo = document.getElementById('debugInfo');
         
         // State
         let currentUser = null;
@@ -408,6 +396,18 @@
             return Math.floor(100000 + Math.random() * 900000).toString();
         }
         
+        // Format time for email template
+        function formatExpirationTime() {
+            const now = new Date();
+            const expirationTime = new Date(now.getTime() + 15 * 60000); // Add 15 minutes
+            
+            // Format time as HH:MM
+            const hours = expirationTime.getHours().toString().padStart(2, '0');
+            const minutes = expirationTime.getMinutes().toString().padStart(2, '0');
+            
+            return `${hours}:${minutes}`;
+        }
+        
         // Start timer
         function startTimer() {
             timeLeft = 120; // Reset to 2 minutes
@@ -428,6 +428,28 @@
             }, 1000);
         }
         
+        // Send email using EmailJS with correct template variables
+        async function sendEmailWithCorrectParams(email, code) {
+            // Calculate expiration time for email template
+            const expirationTime = formatExpirationTime();
+            
+            // Use the exact variable names from your email template
+            const templateParams = {
+                passcode: code,           // This matches {{passcode}} in your template
+                time: expirationTime       // This matches {{time}} in your template
+            };
+            
+            try {
+                const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', templateParams);
+                return {
+                    success: true,
+                    response: response
+                };
+            } catch (error) {
+                throw error;
+            }
+        }
+        
         // Send code to email using EmailJS
         async function sendCode() {
             const email = emailInput.value.trim();
@@ -445,23 +467,9 @@
             // Generate a new code
             currentCode = generateCode();
             
-            // Show debug info
-            debugInfo.style.display = 'block';
-            debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}`;
-            
-            // Send email using EmailJS - اصلاح شده با ساختار صحیح
-            const templateParams = {
-                to_email: email,
-                code: currentCode,
-                from_name: 'مشق‌یار'
-            };
-            
-            console.log('Sending email with params:', templateParams);
-            
             try {
-                // Replace with your actual Service ID and Template ID
-                const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', templateParams);
-                console.log('EmailJS response:', response);
+                // Send email with correct parameters
+                await sendEmailWithCorrectParams(email, currentCode);
                 
                 // Check if user exists in database
                 const userExists = await checkUserExists(email);
@@ -473,9 +481,6 @@
                     // Update user's code
                     await updateUserCode(email, currentCode);
                 }
-                
-                // Hide debug info
-                debugInfo.style.display = 'none';
                 
                 // Move to code step
                 emailStep.style.display = 'none';
@@ -493,9 +498,7 @@
                 showNotification('کد تایید به ایمیل شما ارسال شد', 3000);
                 
             } catch (error) {
-                console.error('Error sending code:', error);
-                debugInfo.innerHTML = `خطا: ${error.message || error}<br>پارامترها: ${JSON.stringify(templateParams)}`;
-                showNotification('خطا در ارسال کد تایید: ' + (error.message || error.text || error), 2000);
+                showNotification('خطا در ارسال کد تایید', 2000);
             }
         }
         
@@ -582,7 +585,6 @@
                 }, 1500);
                 
             } catch (error) {
-                console.error('Error registering user:', error);
                 showNotification('خطا در ثبت نام', 2000);
             }
         }
@@ -659,19 +661,9 @@
             // Generate a new code
             currentCode = generateCode();
             
-            // Send email using EmailJS - اصلاح شده با ساختار صحیح
-            const templateParams = {
-                to_email: email,
-                code: currentCode,
-                from_name: 'مشق‌یار'
-            };
-            
-            console.log('Resending email with params:', templateParams);
-            
             try {
-                // استفاده از Service ID و Template ID صحیح
-                const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', templateParams);
-                console.log('EmailJS resend response:', response);
+                // Send email with correct parameters
+                await sendEmailWithCorrectParams(email, currentCode);
                 
                 // Update user's code
                 await updateUserCode(email, currentCode);
@@ -682,8 +674,7 @@
                 showNotification('کد تایید جدید به ایمیل شما ارسال شد', 3000);
                 
             } catch (error) {
-                console.error('Error resending code:', error);
-                showNotification('خطا در ارسال مجدد کد: ' + (error.message || error.text || error), 3000);
+                showNotification('خطا در ارسال مجدد کد', 2000);
                 resendBtn.disabled = false;
             }
         }
@@ -715,7 +706,6 @@
                 
                 return false;
             } catch (error) {
-                console.error('Error checking user existence:', error);
                 throw error;
             }
         }
@@ -760,7 +750,6 @@
                 });
                 
             } catch (error) {
-                console.error('Error creating user:', error);
                 throw error;
             }
         }
@@ -797,7 +786,6 @@
                 }
                 
             } catch (error) {
-                console.error('Error updating user code:', error);
                 throw error;
             }
         }
@@ -838,7 +826,6 @@
                 }
                 
             } catch (error) {
-                console.error('Error updating user credentials:', error);
                 throw error;
             }
         }
