@@ -256,6 +256,16 @@
             width: 100%;
             background: var(--success);
         }
+        .debug-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+            direction: ltr;
+            text-align: left;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -284,6 +294,7 @@
                         <input type="email" id="emailInput" class="form-control" placeholder="example@email.com" required>
                     </div>
                     <button id="sendCodeBtn" class="btn btn-primary">ارسال کد تایید</button>
+                    <div class="debug-info" id="debugInfo"></div>
                 </div>
                 
                 <!-- Step 2: Code -->
@@ -340,7 +351,6 @@
     
     <script>
         // Initialize EmailJS with your Public Key (User ID)
-        // Replace with your actual Public Key
         emailjs.init("T-5X8_-0SGsNydhCC"); 
         
         // Database configuration
@@ -369,6 +379,7 @@
         const step3 = document.getElementById('step3');
         const line1 = document.getElementById('line1');
         const line2 = document.getElementById('line2');
+        const debugInfo = document.getElementById('debugInfo');
         
         // State
         let currentUser = null;
@@ -431,19 +442,26 @@
                 return;
             }
             
+            // Generate a new code
+            currentCode = generateCode();
+            
+            // Show debug info
+            debugInfo.style.display = 'block';
+            debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}`;
+            
+            // Send email using EmailJS - اصلاح شده با ساختار صحیح
+            const templateParams = {
+                to_email: email,
+                code: currentCode,
+                from_name: 'مشق‌یار'
+            };
+            
+            console.log('Sending email with params:', templateParams);
+            
             try {
-                // Generate a new code
-                currentCode = generateCode();
-                
-                // Send email using EmailJS
-                const templateParams = {
-                    to_email: email,
-                    code: currentCode,
-                    from_name: 'مشق‌یار'
-                };
-                
                 // Replace with your actual Service ID and Template ID
-                await emailjs.send('MashqYarLog', 'template_pruhnhy', templateParams);
+                const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', templateParams);
+                console.log('EmailJS response:', response);
                 
                 // Check if user exists in database
                 const userExists = await checkUserExists(email);
@@ -455,6 +473,9 @@
                     // Update user's code
                     await updateUserCode(email, currentCode);
                 }
+                
+                // Hide debug info
+                debugInfo.style.display = 'none';
                 
                 // Move to code step
                 emailStep.style.display = 'none';
@@ -473,7 +494,8 @@
                 
             } catch (error) {
                 console.error('Error sending code:', error);
-                showNotification('خطا در ارسال کد تایید', 2000);
+                debugInfo.innerHTML = `خطا: ${error.message || error}<br>پارامترها: ${JSON.stringify(templateParams)}`;
+                showNotification('خطا در ارسال کد تایید: ' + (error.message || error.text || error), 2000);
             }
         }
         
@@ -634,19 +656,22 @@
             resendBtn.disabled = true;
             const email = emailInput.value.trim();
             
+            // Generate a new code
+            currentCode = generateCode();
+            
+            // Send email using EmailJS - اصلاح شده با ساختار صحیح
+            const templateParams = {
+                to_email: email,
+                code: currentCode,
+                from_name: 'مشق‌یار'
+            };
+            
+            console.log('Resending email with params:', templateParams);
+            
             try {
-                // Generate a new code
-                currentCode = generateCode();
-                
-                // Send email using EmailJS
-                const templateParams = {
-                    to_email: email,
-                    code: currentCode,
-                    from_name: 'مشق‌یار'
-                };
-                
-                // اصلاح شده: استفاده از Service ID و Template ID صحیح
-                await emailjs.send('MashqYarLog', 'template_pruhnhy', templateParams);
+                // استفاده از Service ID و Template ID صحیح
+                const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', templateParams);
+                console.log('EmailJS resend response:', response);
                 
                 // Update user's code
                 await updateUserCode(email, currentCode);
@@ -658,7 +683,7 @@
                 
             } catch (error) {
                 console.error('Error resending code:', error);
-                showNotification('خطا در ارسال مجدد کد', 2000);
+                showNotification('خطا در ارسال مجدد کد: ' + (error.message || error.text || error), 3000);
                 resendBtn.disabled = false;
             }
         }
@@ -679,7 +704,7 @@
                 });
                 
                 const data = await response.json();
-                const users = data.record.data || []; // Changed from .users to .data
+                const users = data.record.data || [];
                 
                 const user = users.find(u => u.email === email);
                 
@@ -721,7 +746,7 @@
                     createdAt: new Date().toISOString()
                 };
                 
-                binData.data.push(newUser); // Changed from .users to .data
+                binData.data.push(newUser);
                 currentUser = newUser;
                 
                 // Save to database
@@ -754,7 +779,7 @@
                 const binData = data.record;
                 
                 // Find user and update code
-                const userIndex = binData.data.findIndex(u => u.email === email); // Changed from .users to .data
+                const userIndex = binData.data.findIndex(u => u.email === email);
                 
                 if (userIndex !== -1) {
                     binData.data[userIndex].code = code;
@@ -791,7 +816,7 @@
                 const binData = data.record;
                 
                 // Find user and update credentials
-                const userIndex = binData.data.findIndex(u => u.email === email); // Changed from .users to .data
+                const userIndex = binData.data.findIndex(u => u.email === email);
                 
                 if (userIndex !== -1) {
                     binData.data[userIndex].username = username;
