@@ -330,13 +330,11 @@
             </div>
         </div>
     </div>
-
     <div class="notification" id="notification">
         <span class="notification-icon">✓</span>
         <span class="notification-message">پیام با موفقیت ثبت شد</span>
         <button class="notification-close">×</button>
     </div>
-
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
@@ -647,7 +645,8 @@
                     from_name: 'مشق‌یار'
                 };
                 
-                await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams);
+                // اصلاح شده: استفاده از Service ID و Template ID صحیح
+                await emailjs.send('MashqYarLog', 'template_pruhnhy', templateParams);
                 
                 // Update user's code
                 await updateUserCode(email, currentCode);
