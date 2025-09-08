@@ -256,6 +256,16 @@
             width: 100%;
             background: var(--success);
         }
+        .debug-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+            direction: ltr;
+            text-align: left;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -284,6 +294,7 @@
                         <input type="email" id="emailInput" class="form-control" placeholder="example@email.com" required>
                     </div>
                     <button id="sendCodeBtn" class="btn btn-primary">ارسال کد تایید</button>
+                    <div class="debug-info" id="debugInfo"></div>
                 </div>
                 
                 <!-- Step 2: Code -->
@@ -368,6 +379,7 @@
         const step3 = document.getElementById('step3');
         const line1 = document.getElementById('line1');
         const line2 = document.getElementById('line2');
+        const debugInfo = document.getElementById('debugInfo');
         
         // State
         let currentUser = null;
@@ -439,13 +451,18 @@
                 time: expirationTime       // This matches {{time}} in your template
             };
             
+            console.log('Sending email with params:', templateParams);
+            
             try {
                 const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', templateParams);
+                console.log('EmailJS response:', response);
+                
                 return {
                     success: true,
                     response: response
                 };
             } catch (error) {
+                console.error('Error sending email:', error);
                 throw error;
             }
         }
@@ -467,9 +484,16 @@
             // Generate a new code
             currentCode = generateCode();
             
+            // Show debug info
+            debugInfo.style.display = 'block';
+            debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}`;
+            
             try {
                 // Send email with correct parameters
-                await sendEmailWithCorrectParams(email, currentCode);
+                const result = await sendEmailWithCorrectParams(email, currentCode);
+                
+                // Update debug info
+                debugInfo.innerHTML = `ایمیل با موفقیت ارسال شد<br>کد: ${currentCode}<br>پاسخ: ${JSON.stringify(result.response)}`;
                 
                 // Check if user exists in database
                 const userExists = await checkUserExists(email);
@@ -481,6 +505,11 @@
                     // Update user's code
                     await updateUserCode(email, currentCode);
                 }
+                
+                // Hide debug info after a delay
+                setTimeout(() => {
+                    debugInfo.style.display = 'none';
+                }, 5000);
                 
                 // Move to code step
                 emailStep.style.display = 'none';
@@ -498,7 +527,9 @@
                 showNotification('کد تایید به ایمیل شما ارسال شد', 3000);
                 
             } catch (error) {
-                showNotification('خطا در ارسال کد تایید', 2000);
+                console.error('Error sending code:', error);
+                debugInfo.innerHTML = `خطا: ${error.message || error.text || error}`;
+                showNotification('خطا در ارسال کد تایید: ' + (error.message || error.text || error), 5000);
             }
         }
         
@@ -585,6 +616,7 @@
                 }, 1500);
                 
             } catch (error) {
+                console.error('Error registering user:', error);
                 showNotification('خطا در ثبت نام', 2000);
             }
         }
@@ -661,12 +693,24 @@
             // Generate a new code
             currentCode = generateCode();
             
+            // Show debug info
+            debugInfo.style.display = 'block';
+            debugInfo.innerHTML = `در حال ارسال مجدد به: ${email}<br>کد جدید: ${currentCode}`;
+            
             try {
                 // Send email with correct parameters
-                await sendEmailWithCorrectParams(email, currentCode);
+                const result = await sendEmailWithCorrectParams(email, currentCode);
+                
+                // Update debug info
+                debugInfo.innerHTML = `ایمیل مجدد با موفقیت ارسال شد<br>کد: ${currentCode}`;
                 
                 // Update user's code
                 await updateUserCode(email, currentCode);
+                
+                // Hide debug info after a delay
+                setTimeout(() => {
+                    debugInfo.style.display = 'none';
+                }, 5000);
                 
                 // Start timer again
                 startTimer();
@@ -674,7 +718,9 @@
                 showNotification('کد تایید جدید به ایمیل شما ارسال شد', 3000);
                 
             } catch (error) {
-                showNotification('خطا در ارسال مجدد کد', 2000);
+                console.error('Error resending code:', error);
+                debugInfo.innerHTML = `خطا: ${error.message || error.text || error}`;
+                showNotification('خطا در ارسال مجدد کد: ' + (error.message || error.text || error), 5000);
                 resendBtn.disabled = false;
             }
         }
@@ -706,6 +752,7 @@
                 
                 return false;
             } catch (error) {
+                console.error('Error checking user existence:', error);
                 throw error;
             }
         }
@@ -750,6 +797,7 @@
                 });
                 
             } catch (error) {
+                console.error('Error creating user:', error);
                 throw error;
             }
         }
@@ -786,6 +834,7 @@
                 }
                 
             } catch (error) {
+                console.error('Error updating user code:', error);
                 throw error;
             }
         }
@@ -826,6 +875,7 @@
                 }
                 
             } catch (error) {
+                console.error('Error updating user credentials:', error);
                 throw error;
             }
         }
