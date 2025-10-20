@@ -439,191 +439,129 @@
         }
         
         // Send email using EmailJS with multiple parameter configurations
-        async function sendEmailWithFallback(email, code) {
-            // Calculate expiration time for email template
-            const expirationTime = formatExpirationTime();
-            
-            // Try different parameter configurations
-            const configs = [
-                // Configuration 1: Correct format for your template
-                {
-                    params: {
-                        passcode: code,           // This matches {{passcode}} in your template
-                        time: expirationTime       // This matches {{time}} in your template
-                    },
-                    description: "Correct format (passcode, time)"
-                },
-                // Configuration 2: Standard EmailJS format
-                {
-                    params: {
-                        to_email: email,
-                        code: code,
-                        from_name: 'مشق‌یار'
-                    },
-                    description: "Standard format (to_email, code)"
-                },
-                // Configuration 3: Alternative format
-                {
-                    params: {
-                        email: email,
-                        verification_code: code,
-                        from_name: 'مشق‌یار'
-                    },
-                    description: "Alternative format (email, verification_code)"
-                },
-                // Configuration 4: Mixed format
-                {
-                    params: {
-                        to_email: email,
-                        verification_code: code,
-                        from_name: 'مشق‌یار'
-                    },
-                    description: "Mixed format (to_email, verification_code)"
-                },
-                // Configuration 5: Simple format
-                {
-                    params: {
-                        user_email: email,
-                        confirm_code: code,
-                        from_name: 'مشق‌یار'
-                    },
-                    description: "Simple format (user_email, confirm_code)"
-                }
-            ];
-            
-            // Try each configuration
-            for (let i = 0; i < configs.length; i++) {
-                const config = configs[i];
-                try {
-                    console.log(`Trying configuration ${i+1}: ${config.description}`, config.params);
-                    
-                    const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', config.params);
-                    console.log(`Configuration ${i+1} succeeded:`, response);
-                    
-                    // Return the successful configuration
-                    return {
-                        success: true,
-                        config: config,
-                        response: response
-                    };
-                } catch (error) {
-                    console.error(`Configuration ${i+1} failed:`, error);
-                    
-                    // If this is the last configuration, throw the error
-                    if (i === configs.length - 1) {
-                        throw new Error(`All email configurations failed. Last error: ${error.message || error.text || error}`);
-                    }
-                }
-            }
-            
-            // This should never be reached, but just in case
-            throw new Error("All email configurations failed");
+// --- ارسال ایمیل با کد ---
+async function sendEmail(email, code) {
+    const expirationTime = formatExpirationTime();
+
+    // پارامترهایی که باید در قالب EmailJS تعریف شده باشن:
+    // {{to_email}}, {{passcode}}, {{time}}, {{from_name}}
+    const params = {
+        to_email: email,
+        passcode: code,
+        time: expirationTime,
+        from_name: 'مشق‌یار'
+    };
+
+    try {
+        const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', params);
+        console.log('ایمیل با موفقیت ارسال شد ✅', response);
+        return response;
+    } catch (error) {
+        console.error('خطا در ارسال ایمیل ❌', error);
+        throw error;
+    }
+}
+
+// --- ارسال کد ---
+async function sendCode() {
+    const email = emailInput.value.trim();
+
+    if (!email) {
+        showNotification('لطفاً ایمیل خود را وارد کنید', 2000);
+        return;
+    }
+
+    if (!validateEmail(email)) {
+        showNotification('لطفاً یک ایمیل معتبر وارد کنید', 2000);
+        return;
+    }
+
+    // تولید کد جدید
+    currentCode = generateCode();
+
+    // نمایش اطلاعات دیباگ (در کنسول)
+    console.log(`ارسال کد ${currentCode} به ${email}`);
+
+    // پنهان‌کردن و آماده‌سازی دیباگ
+    debugInfo.style.display = 'none';
+    debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}`;
+
+    try {
+        // ارسال ایمیل با EmailJS
+        await sendEmail(email, currentCode);
+
+        debugInfo.innerHTML = `ارسال موفق به ${email}<br>کد: ${currentCode}`;
+
+        // بررسی وجود کاربر در دیتابیس
+        const userExists = await checkUserExists(email);
+
+        if (!userExists) {
+            await createUser(email, currentCode);
+        } else {
+            await updateUserCode(email, currentCode);
         }
-        
-        // Send code to email using EmailJS
-        async function sendCode() {
-            const email = emailInput.value.trim();
-            
-            if (!email) {
-                showNotification('لطفاً ایمیل خود را وارد کنید', 2000);
-                return;
-            }
-            
-            if (!validateEmail(email)) {
-                showNotification('لطفاً یک ایمیل معتبر وارد کنید', 2000);
-                return;
-            }
-            
-            // Generate a new code
-            currentCode = generateCode();
-            
-            // Show debug info (hidden from user but visible in console)
+
+        // مخفی‌کردن دیباگ بعد از چند ثانیه
+        setTimeout(() => {
             debugInfo.style.display = 'none';
-            debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}<br>در حال تلاش با پیکربندی‌های مختلف...`;
-            
-            try {
-                // Try to send email with fallback configurations
-                const result = await sendEmailWithFallback(email, currentCode);
-                
-                // Update debug info (hidden from user but visible in console)
-                debugInfo.innerHTML = `ارسال موفق با پیکربندی: ${result.config.description}<br>پارامترها: ${JSON.stringify(result.config.params)}`;
-                
-                // Check if user exists in database
-                const userExists = await checkUserExists(email);
-                
-                if (!userExists) {
-                    // Create new user with temporary data
-                    await createUser(email, currentCode);
-                } else {
-                    // Update user's code
-                    await updateUserCode(email, currentCode);
-                }
-                
-                // Hide debug info after a delay
-                setTimeout(() => {
-                    debugInfo.style.display = 'none';
-                }, 5000);
-                
-                // Move to code step
-                emailStep.style.display = 'none';
-                codeStep.style.display = 'block';
-                
-                // Update step indicator
-                step1.classList.add('completed');
-                step1.classList.remove('active');
-                step2.classList.add('active');
-                line1.classList.add('completed');
-                
-                // Start timer
-                startTimer();
-                
-                showNotification('کد تایید به ایمیل شما ارسال شد', 3000);
-                
-            } catch (error) {
-                console.error('Error sending code:', error);
-                debugInfo.innerHTML = `خطا: ${error.message || error}<br>تمام پیکربندی‌ها آزمایش شدند`;
-                showNotification('خطا در ارسال کد تایید', 2000);
-            }
+        }, 5000);
+
+        // نمایش مرحله بعدی (کد تایید)
+        emailStep.style.display = 'none';
+        codeStep.style.display = 'block';
+
+        // به‌روزرسانی مراحل
+        step1.classList.add('completed');
+        step1.classList.remove('active');
+        step2.classList.add('active');
+        line1.classList.add('completed');
+
+        // شروع تایمر
+        startTimer();
+
+        showNotification('کد تایید به ایمیل شما ارسال شد ✅', 3000);
+    } catch (error) {
+        console.error('خطا در ارسال کد:', error);
+        debugInfo.innerHTML = `❌ خطا: ${error.message || error}`;
+        showNotification('خطا در ارسال کد تایید', 2000);
+    }
+}
+
+// --- تایید کد ---
+async function verifyCode() {
+    const code = codeInput.value.trim();
+
+    if (!code) {
+        showNotification('لطفاً کد تایید را وارد کنید', 2000);
+        return;
+    }
+
+    if (code === currentCode) {
+        showNotification('کد تایید صحیح است ✅', 2000);
+
+        if (currentUser && currentUser.username && currentUser.password) {
+            // کاربر ثبت‌نام‌شده: ورود مستقیم
+            localStorage.setItem('mashqyar_user', JSON.stringify(currentUser));
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        } else {
+            // کاربر جدید: مرحله‌ی بعدی ثبت‌نام
+            codeStep.style.display = 'none';
+            credentialsStep.style.display = 'block';
+
+            step2.classList.add('completed');
+            step2.classList.remove('active');
+            step3.classList.add('active');
+            line2.classList.add('completed');
+
+            clearInterval(timerInterval);
         }
-        
-        // Verify code
-        async function verifyCode() {
-            const code = codeInput.value.trim();
-            
-            if (!code) {
-                showNotification('لطفاً کد تایید را وارد کنید', 2000);
-                return;
-            }
-            
-            if (code === currentCode) {
-                // Code is correct
-                showNotification('کد تایید صحیح است', 2000);
-                
-                // Check if user has completed registration
-                if (currentUser && currentUser.username && currentUser.password) {
-                    // User already registered, log in
-                    localStorage.setItem('mashqyar_user', JSON.stringify(currentUser));
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1500);
-                } else {
-                    // Move to credentials step
-                    codeStep.style.display = 'none';
-                    credentialsStep.style.display = 'block';
-                    
-                    // Update step indicator
-                    step2.classList.add('completed');
-                    step2.classList.remove('active');
-                    step3.classList.add('active');
-                    line2.classList.add('completed');
-                    
-                    // Clear timer
-                    clearInterval(timerInterval);
-                }
-            } else {
-                showNotification('کد تایید نادرست است', 2000);
-            }
-        }
+    } else {
+        showNotification('کد تایید نادرست است ❌', 2000);
+    }
+}
+
         
         // Register user with username and password
         async function registerUser() {
