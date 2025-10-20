@@ -440,20 +440,23 @@
         
         // Send email using EmailJS with multiple parameter configurations
 // --- ارسال ایمیل با کد ---
+// =========================
+// تابع ارسال ایمیل با چند پیکربندی (fallback)
+// =========================
 async function sendEmailWithFallback(email, code) {
-    // زمان انقضا (برای نمایش در قالب ایمیل)
+    // زمان انقضا برای نمایش در قالب
     const expirationTime = formatExpirationTime();
 
-    // فقط پیکربندی‌های درست و منطقی رو نگه می‌داریم
+    // چند پیکربندی برای امتحان (مثل نسخه خودت)
     const configs = [
         {
             params: {
-                to_email: email,     // ایمیل گیرنده
-                passcode: code,      // برای {{passcode}}
-                time: expirationTime,// برای {{time}}
+                to_email: email,        // ← حتماً این متغیر در EmailJS Template بساز
+                passcode: code,         // ← برای {{passcode}}
+                time: expirationTime,   // ← برای {{time}}
                 from_name: 'مشق‌یار'
             },
-            description: "اصلی (to_email, passcode, time)"
+            description: "Main config (to_email, passcode, time)"
         },
         {
             params: {
@@ -462,7 +465,7 @@ async function sendEmailWithFallback(email, code) {
                 time: expirationTime,
                 from_name: 'مشق‌یار'
             },
-            description: "پشتیبان (email, passcode, time)"
+            description: "Backup (email, passcode, time)"
         },
         {
             params: {
@@ -471,29 +474,35 @@ async function sendEmailWithFallback(email, code) {
                 expire_time: expirationTime,
                 from_name: 'مشق‌یار'
             },
-            description: "پشتیبان (verification_code, expire_time)"
+            description: "Legacy format (verification_code, expire_time)"
         }
     ];
 
-    // آزمایش پیکربندی‌ها یکی یکی
+    // امتحان هر پیکربندی
     for (let i = 0; i < configs.length; i++) {
         const config = configs[i];
         try {
             console.log(`Trying configuration ${i + 1}: ${config.description}`, config.params);
 
-            const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', config.params);
-            console.log(`Configuration ${i + 1} succeeded:`, response);
+            const response = await emailjs.send(
+                "MashqYarLog",        // شناسه سرویس (Service ID)
+                "template_pruhnhy",   // شناسه قالب (Template ID)
+                config.params
+            );
 
+            console.log(`✅ Configuration ${i + 1} succeeded`, response);
+
+            // اگه موفق شد، برگرد
             return {
                 success: true,
-                config: config,
-                response: response
+                config,
+                response
             };
         } catch (error) {
-            console.error(`Configuration ${i + 1} failed:`, error);
+            console.error(`❌ Configuration ${i + 1} failed:`, error);
 
             if (i === configs.length - 1) {
-                throw new Error(`All email configurations failed. Last error: ${error.message || error.text || error}`);
+                throw new Error(`All configurations failed: ${error.message || error}`);
             }
         }
     }
@@ -501,70 +510,82 @@ async function sendEmailWithFallback(email, code) {
     throw new Error("All email configurations failed");
 }
 
-// ارسال کد به ایمیل کاربر
+// =========================
+// ارسال کد تأیید
+// =========================
 async function sendCode() {
     const email = emailInput.value.trim();
 
     if (!email) {
-        showNotification('لطفاً ایمیل خود را وارد کنید', 2000);
+        showNotification("لطفاً ایمیل خود را وارد کنید", 2000);
         return;
     }
 
     if (!validateEmail(email)) {
-        showNotification('لطفاً یک ایمیل معتبر وارد کنید', 2000);
+        showNotification("لطفاً یک ایمیل معتبر وارد کنید", 2000);
         return;
     }
 
     // تولید کد جدید
     currentCode = generateCode();
 
-    debugInfo.style.display = 'none';
-    debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}<br>در حال تلاش با پیکربندی‌های مختلف...`;
+    // نمایش در دیباگ
+    debugInfo.style.display = "block";
+    debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}`;
 
     try {
         const result = await sendEmailWithFallback(email, currentCode);
 
-        debugInfo.innerHTML = `ارسال موفق با پیکربندی: ${result.config.description}<br>پارامترها: ${JSON.stringify(result.config.params)}`;
+        debugInfo.innerHTML = `✅ ارسال موفق با پیکربندی: ${result.config.description}<br>پارامترها: ${JSON.stringify(result.config.params)}`;
 
-        const userExists = await checkU
+        // ذخیره یا به‌روزرسانی کاربر
+        const userExists = await checkUserExists(email);
+        if (!userExists) {
+            await createUser(email, currentCode);
+        } else {
+            await updateUserCode(email, currentCode);
+        }
 
+        // پنهان‌کردن دیباگ بعد از چند ثانیه
+        setTimeout(() => {
+            debugInfo.style.display = "none";
+        }, 5000);
 
-// --- تایید کد ---
+        // رفتن به مرحله بعد (ورود کد)
+        emailStep.style.display = "none";
+        codeStep.style.display = "block";
+
+        step1.classList.add("completed");
+        step1.classList.remove("active");
+        step2.classList.add("active");
+        line1.classList.add("completed");
+
+        startTimer();
+
+        showNotification("کد تایید به ایمیل شما ارسال شد ✅", 3000);
+    } catch (error) {
+        console.error("Error sending code:", error);
+        debugInfo.innerHTML = `❌ خطا در ارسال: ${error.message}`;
+        showNotification("خطا در ارسال کد تایید", 2000);
+    }
+}
+
+// =========================
+// بررسی کد واردشده
+// =========================
 async function verifyCode() {
     const code = codeInput.value.trim();
 
     if (!code) {
-        showNotification('لطفاً کد تایید را وارد کنید', 2000);
+        showNotification("لطفاً کد تایید را وارد کنید", 2000);
         return;
     }
 
     if (code === currentCode) {
-        showNotification('کد تایید صحیح است ✅', 2000);
+        showNotification("کد تایید صحیح است ✅", 2000);
 
-        if (currentUser && currentUser.username && currentUser.password) {
-            // کاربر ثبت‌نام‌شده: ورود مستقیم
-            localStorage.setItem('mashqyar_user', JSON.stringify(currentUser));
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1500);
-        } else {
-            // کاربر جدید: مرحله‌ی بعدی ثبت‌نام
-            codeStep.style.display = 'none';
-            credentialsStep.style.display = 'block';
+        if (current
 
-            step2.classList.add('completed');
-            step2.classList.remove('active');
-            step3.classList.add('active');
-            line2.classList.add('completed');
-
-            clearInterval(timerInterval);
-        }
-    } else {
-        showNotification('کد تایید نادرست است ❌', 2000);
-    }
-}
-
-        
         // Register user with username and password
         async function registerUser() {
             const username = usernameInput.value.trim();
