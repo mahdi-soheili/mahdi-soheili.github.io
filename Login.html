@@ -440,29 +440,68 @@
         
         // Send email using EmailJS with multiple parameter configurations
 // --- ارسال ایمیل با کد ---
-async function sendEmail(email, code) {
+async function sendEmailWithFallback(email, code) {
+    // زمان انقضا (برای نمایش در قالب ایمیل)
     const expirationTime = formatExpirationTime();
 
-    // پارامترهایی که باید در قالب EmailJS تعریف شده باشن:
-    // {{to_email}}, {{passcode}}, {{time}}, {{from_name}}
-    const params = {
-        to_email: email,
-        passcode: code,
-        time: expirationTime,
-        from_name: 'مشق‌یار'
-    };
+    // فقط پیکربندی‌های درست و منطقی رو نگه می‌داریم
+    const configs = [
+        {
+            params: {
+                to_email: email,     // ایمیل گیرنده
+                passcode: code,      // برای {{passcode}}
+                time: expirationTime,// برای {{time}}
+                from_name: 'مشق‌یار'
+            },
+            description: "اصلی (to_email, passcode, time)"
+        },
+        {
+            params: {
+                email: email,
+                passcode: code,
+                time: expirationTime,
+                from_name: 'مشق‌یار'
+            },
+            description: "پشتیبان (email, passcode, time)"
+        },
+        {
+            params: {
+                to_email: email,
+                verification_code: code,
+                expire_time: expirationTime,
+                from_name: 'مشق‌یار'
+            },
+            description: "پشتیبان (verification_code, expire_time)"
+        }
+    ];
 
-    try {
-        const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', params);
-        console.log('ایمیل با موفقیت ارسال شد ✅', response);
-        return response;
-    } catch (error) {
-        console.error('خطا در ارسال ایمیل ❌', error);
-        throw error;
+    // آزمایش پیکربندی‌ها یکی یکی
+    for (let i = 0; i < configs.length; i++) {
+        const config = configs[i];
+        try {
+            console.log(`Trying configuration ${i + 1}: ${config.description}`, config.params);
+
+            const response = await emailjs.send('MashqYarLog', 'template_pruhnhy', config.params);
+            console.log(`Configuration ${i + 1} succeeded:`, response);
+
+            return {
+                success: true,
+                config: config,
+                response: response
+            };
+        } catch (error) {
+            console.error(`Configuration ${i + 1} failed:`, error);
+
+            if (i === configs.length - 1) {
+                throw new Error(`All email configurations failed. Last error: ${error.message || error.text || error}`);
+            }
+        }
     }
+
+    throw new Error("All email configurations failed");
 }
 
-// --- ارسال کد ---
+// ارسال کد به ایمیل کاربر
 async function sendCode() {
     const email = emailInput.value.trim();
 
@@ -479,53 +518,16 @@ async function sendCode() {
     // تولید کد جدید
     currentCode = generateCode();
 
-    // نمایش اطلاعات دیباگ (در کنسول)
-    console.log(`ارسال کد ${currentCode} به ${email}`);
-
-    // پنهان‌کردن و آماده‌سازی دیباگ
     debugInfo.style.display = 'none';
-    debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}`;
+    debugInfo.innerHTML = `در حال ارسال به: ${email}<br>کد: ${currentCode}<br>در حال تلاش با پیکربندی‌های مختلف...`;
 
     try {
-        // ارسال ایمیل با EmailJS
-        await sendEmail(email, currentCode);
+        const result = await sendEmailWithFallback(email, currentCode);
 
-        debugInfo.innerHTML = `ارسال موفق به ${email}<br>کد: ${currentCode}`;
+        debugInfo.innerHTML = `ارسال موفق با پیکربندی: ${result.config.description}<br>پارامترها: ${JSON.stringify(result.config.params)}`;
 
-        // بررسی وجود کاربر در دیتابیس
-        const userExists = await checkUserExists(email);
+        const userExists = await checkU
 
-        if (!userExists) {
-            await createUser(email, currentCode);
-        } else {
-            await updateUserCode(email, currentCode);
-        }
-
-        // مخفی‌کردن دیباگ بعد از چند ثانیه
-        setTimeout(() => {
-            debugInfo.style.display = 'none';
-        }, 5000);
-
-        // نمایش مرحله بعدی (کد تایید)
-        emailStep.style.display = 'none';
-        codeStep.style.display = 'block';
-
-        // به‌روزرسانی مراحل
-        step1.classList.add('completed');
-        step1.classList.remove('active');
-        step2.classList.add('active');
-        line1.classList.add('completed');
-
-        // شروع تایمر
-        startTimer();
-
-        showNotification('کد تایید به ایمیل شما ارسال شد ✅', 3000);
-    } catch (error) {
-        console.error('خطا در ارسال کد:', error);
-        debugInfo.innerHTML = `❌ خطا: ${error.message || error}`;
-        showNotification('خطا در ارسال کد تایید', 2000);
-    }
-}
 
 // --- تایید کد ---
 async function verifyCode() {
